@@ -18,8 +18,8 @@ st.set_page_config(
 def check_password():
     """Mengembalikan True jika pengguna memasukkan password yang benar."""
     def password_entered():
-        # Ganti "yusbuset11230371" dengan password pilihan Anda
-        if st.session_state["password"] == "rahasia123":
+        # Ganti "rahasia123" dengan password pilihan Anda
+        if st.session_state["password"] == "modulpm230371":
             st.session_state["password_correct"] = True
             del st.session_state["password"]
         else:
