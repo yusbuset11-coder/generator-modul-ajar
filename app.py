@@ -13,7 +13,40 @@ st.set_page_config(
     page_title="GENERATOR: MODUL AJAR PEMBELAJARAN MENDALAM",
     page_icon="📚",
     layout="wide",
+)import streamlit as st
+
+st.set_page_config(
+    page_title="GENERATOR: MODUL AJAR PEMBELAJARAN MENDALAM",
+    page_icon="🚀",
+    layout="wide"
 )
+
+# === SALIN KODE PASSWORD DI SINI ===
+def check_password():
+    """Mengembalikan True jika pengguna memasukkan password yang benar."""
+    def password_entered():
+        # Ganti "yusbuset11230371" dengan password pilihan Anda
+        if st.session_state["password"] == "rahasia123":
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.text_input("🔑 Masukkan Password Akses Aplikasi:", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("🔑 Masukkan Password Akses Aplikasi:", type="password", on_change=password_entered, key="password")
+        st.error("😕 Maaf, password yang Anda masukkan salah.")
+        return False
+    else:
+        return True
+
+if not check_password():
+    st.stop()
+# ===================================
+
+# Lanjutkan sisa kode aplikasi Anda di bawah baris ini...
 
 # Custom CSS untuk tampilan UI yang modern, keren, dan profesional
 st.markdown(
