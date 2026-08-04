@@ -13,15 +13,8 @@ st.set_page_config(
     page_title="GENERATOR: MODUL AJAR PEMBELAJARAN MENDALAM",
     page_icon="📚",
     layout="wide",
-)import streamlit as st
-
-st.set_page_config(
-    page_title="GENERATOR: MODUL AJAR PEMBELAJARAN MENDALAM",
-    page_icon="🚀",
-    layout="wide"
 )
 
-# === SALIN KODE PASSWORD DI SINI ===
 def check_password():
     """Mengembalikan True jika pengguna memasukkan password yang benar."""
     def password_entered():
