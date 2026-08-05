@@ -20,7 +20,7 @@ def check_password():
   """Mengembalikan True jika pengguna memasukkan password yang benar."""
 
   def password_entered():
-    if st.session_state["password"] == "yusbuset11230371":
+    if st.session_state["password"] == "modulpm230371":
       st.session_state["password_correct"] = True
       del st.session_state["password"]
     else:
