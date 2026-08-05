@@ -15,31 +15,41 @@ st.set_page_config(
     layout="wide",
 )
 
-def check_password():
-    """Mengembalikan True jika pengguna memasukkan password yang benar."""
-    def password_entered():
-        # Ganti "rahasia123" dengan password pilihan Anda
-        if st.session_state["password"] == "modulpm230371":
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
 
-    if "password_correct" not in st.session_state:
-        st.text_input("🔑 Masukkan Password Akses Aplikasi:", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("🔑 Masukkan Password Akses Aplikasi:", type="password", on_change=password_entered, key="password")
-        st.error("😕 Maaf, password yang Anda masukkan salah.")
-        return False
+def check_password():
+  """Mengembalikan True jika pengguna memasukkan password yang benar."""
+
+  def password_entered():
+    if st.session_state["password"] == "yusbuset11230371":
+      st.session_state["password_correct"] = True
+      del st.session_state["password"]
     else:
-        return True
+      st.session_state["password_correct"] = False
+
+  if "password_correct" not in st.session_state:
+    st.text_input(
+        "🔑 Masukkan Password Akses Aplikasi:",
+        type="password",
+        on_change=password_entered,
+        key="password",
+    )
+    return False
+  elif not st.session_state["password_correct"]:
+    st.text_input(
+        "🔑 Masukkan Password Akses Aplikasi:",
+        type="password",
+        on_change=password_entered,
+        key="password",
+    )
+    st.error("😕 Maaf, password yang Anda masukkan salah.")
+    return False
+  else:
+    return True
+
 
 if not check_password():
-    st.stop()
+  st.stop()
 # ===================================
-
-# Lanjutkan sisa kode aplikasi Anda di bawah baris ini...
 
 # Custom CSS untuk tampilan UI yang modern, keren, dan profesional
 st.markdown(
@@ -132,7 +142,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Tampilan Header Modern dalam Card (Marquee dipercepat & Subtitle 1 baris berkedip)
+# Tampilan Header Modern dalam Card
 st.markdown(
     """
     <div class="header-card">
@@ -209,15 +219,15 @@ with st.sidebar:
 
   st.markdown("---")
   st.header("🏫 Identitas Satuan Pendidikan")
-  nama_sekolah = st.text_input("Nama Sekolah", "SMKN 1 Bangkalan / Sesuai Satuan")
+  nama_sekolah = st.text_input("Nama Sekolah", "SD Negeri Balongsari 2 Surabaya")
   semester = st.selectbox("Semester", ["Ganjil", "Genap"])
-  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2025/2026")
+  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2026/2027")
 
   st.markdown("---")
   st.header("✍️ Identitas Pengesahan Dokumen")
   nama_kota = st.text_input("Nama Kota", "Bangkalan")
   tanggal_pembuatan = st.text_input(
-      "Tanggal / Bulan / Tahun", "4 Agustus 2026"
+      "Tanggal / Bulan / Tahun", "5 Agustus 2026"
   )
   nama_penulis = st.text_input(
       "Nama Penulis Modul", "Yustinus Budi Setyanta, S.Pd., M.Pd."
@@ -225,13 +235,13 @@ with st.sidebar:
   nip_penulis = st.text_input("NIP Penulis", "196908302005011003")
 
 
-# Fungsi pembantu warna latar belakang sel tabel Word (Warna Kuning Header)
+# Fungsi pembantu warna latar belakang sel tabel Word
 def set_cell_background(cell, fill_color):
   shading_elm = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_color}"/>')
   cell._tc.get_or_add_tcPr().append(shading_elm)
 
 
-# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks
+# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks dengan Estetika Eye-Catching & Format Rata Kiri
 def generate_docx(
     data_ai,
     nama_sekolah,
@@ -261,7 +271,7 @@ def generate_docx(
   font.size = Pt(10)
   font.color.rgb = RGBColor(51, 51, 51)
 
-  # Judul Utama Dokumen (Tetap Center/Tengah)
+  # Judul Utama Dokumen
   p_title = doc.add_paragraph()
   p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
   p_title.paragraph_format.space_before = Pt(0)
@@ -271,7 +281,7 @@ def generate_docx(
   run_title.font.size = Pt(13)
   run_title.font.bold = True
 
-  # Helper untuk menambah tabel section dengan header kuning & perataan rata kiri semua isi
+  # Helper untuk menambah tabel section dengan header kuning, kolom kiri berwarna (eye-catching), dan format teks sesuai permintaan
   def add_section_table(title_text, rows_data):
     table = doc.add_table(rows=len(rows_data) + 1, cols=2)
     table.style = "Table Grid"
@@ -284,9 +294,12 @@ def generate_docx(
     set_cell_background(hdr_cells[0], "FFE599")
     for p in hdr_cells[0].paragraphs:
       p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+      p.paragraph_format.space_before = Pt(4)
+      p.paragraph_format.space_after = Pt(4)
       for run in p.runs:
         run.font.bold = True
         run.font.size = Pt(10)
+        run.font.color.rgb = RGBColor(51, 51, 51)
 
     # Content Rows
     for idx, (label, val) in enumerate(rows_data):
@@ -296,46 +309,60 @@ def generate_docx(
       row_cells[0].width = Inches(2.2)
       row_cells[1].width = Inches(4.3)
 
-      # Kolom Kiri (Label / Sub-bagian) -> Bold & Rata Kiri
+      # Memberikan warna latar belakang lembut pada kolom kiri agar Eye-Catching
+      set_cell_background(row_cells[0], "F2F5F9")
+
+      # Kolom Kiri (Label) -> Bold & Rata Kiri
       for p in row_cells[0].paragraphs:
-        p.paragraph_format.space_before = Pt(3)
-        p.paragraph_format.space_after = Pt(3)
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         for run in p.runs:
           run.font.size = Pt(10)
           run.font.bold = True
+          run.font.color.rgb = RGBColor(51, 51, 51)
 
-      # Kolom Kanan (Isi) -> Rata Kiri Semua, Sub-bagian otomatis di-bold
+      # Kolom Kanan (Isi)
       for p in row_cells[1].paragraphs:
-        p.paragraph_format.space_before = Pt(3)
-        p.paragraph_format.space_after = Pt(3)
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
-        p.alignment = WD_ALIGN_PARAGRAPH.LEFT  # Margin rata kiri semua
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
         text_p = p.text.strip()
-        # Deteksi sub-bagian, judul pertemuan, kegiatan, atau penanda penting agar di-bold
-        is_subheader = (
-            text_p.startswith("PERTEMUAN")
-            or text_p.startswith("Kegiatan")
-            or text_p.startswith("Asesmen")
-            or text_p.startswith("1.")
-            or text_p.startswith("2.")
-            or text_p.startswith("3.")
-            or text_p.startswith("4.")
-            or text_p.startswith("a.")
-            or text_p.startswith("b.")
-            or text_p.startswith("c.")
-            or text_p.startswith("d.")
-            or text_p.startswith("☐")
-            or text_p.endswith(":")
-            or len(text_p) < 85 and not text_p.endswith(".")
-        )
 
-        for run in p.runs:
-          run.font.size = Pt(10)
-          if is_subheader:
-            run.font.bold = True
+        # KHUSUS TABEL IDENTITAS: Kolom kanan TIDAK BOLEH BOLD (Normal)
+        if title_text == "IDENTITAS":
+          for run in p.runs:
+            run.font.size = Pt(10)
+            run.font.bold = False
+            run.font.color.rgb = RGBColor(51, 51, 51)
+        else:
+          # TABEL KONTEN LAINNYA: Sub-bagian/subjudul dicetak Bold, isi teks normal
+          is_subheader = (
+              text_p.startswith("PERTEMUAN")
+              or text_p.startswith("Kegiatan")
+              or text_p.startswith("Asesmen")
+              or text_p.startswith("1.")
+              or text_p.startswith("2.")
+              or text_p.startswith("3.")
+              or text_p.startswith("4.")
+              or text_p.startswith("a.")
+              or text_p.startswith("b.")
+              or text_p.startswith("c.")
+              or text_p.startswith("d.")
+              or text_p.startswith("☐")
+              or text_p.endswith(":")
+              or (len(text_p) < 85 and not text_p.endswith("."))
+          )
+          for run in p.runs:
+            run.font.size = Pt(10)
+            run.font.color.rgb = RGBColor(51, 51, 51)
+            if is_subheader:
+              run.font.bold = True
+            else:
+              run.font.bold = False
 
     doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
@@ -388,7 +415,7 @@ def generate_docx(
   ]
   add_section_table("B. Desain Pembelajaran (Deep Learning)", tabel_desain)
 
-  # 4. Tabel C. Pengalaman Belajar (Pertemuan 1 & 2)
+  # 4. Tabel C. Pengalaman Belajar
   tabel_pengalaman = [
       (
           "Pertemuan 1",
@@ -419,7 +446,7 @@ def generate_docx(
   ]
   add_section_table("D. Asesmen Pembelajaran Vokasi / Akademik", tabel_asesmen)
 
-  # Tanda Tangan / Pengesahan di Bagian Bawah ("Disusun")
+  # Tanda Tangan / Pengesahan di Bagian Bawah
   p_sign = doc.add_paragraph()
   p_sign.alignment = WD_ALIGN_PARAGRAPH.RIGHT
   p_sign.paragraph_format.space_before = Pt(14)
@@ -457,16 +484,16 @@ if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
             Catatan Penting:
             - Gunakan istilah "Dimensi Profil Lulusan (DPL)" secara konsisten (jangan gunakan istilah lama Profil Pelajar Pancasila).
             - Pilih 2 sampai 4 Dimensi Profil Lulusan (DPL) yang paling relevan dan kontekstual dengan topik "{topik}" dari daftar 8 DPL berikut (DPL1: Keimanan & Ketakwaan, DPL2: Kewargaan, DPL3: Penalaran Kritis, DPL4: Kreativitas, DPL5: Kolaborasi, DPL6: Kemandirian, DPL7: Kesehatan, DPL8: Komunikasi). Berikan format kotak centang (☐) hanya pada DPL yang dipilih tersebut.
-            - Pastikan setiap sub-bagian atau poin uraian dipisahkan dengan baris baru (newline) agar terformat rapi di dokumen Word.
+            - Pastikan setiap sub-bagian, subjudul, atau poin penomoran (seperti "Analisis Karakteristik...", "1. Kompetensi Awal & Prasyarat:", dll.) diletakkan pada baris baru dan diakhiri dengan tanda titik dua (:) agar aplikasi dapat memformatnya menjadi tebal (bold) dengan rapi.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
-              "peserta_didik": "Uraian sangat detail mengenai kompetensi awal, prasyarat, gaya belajar, dan kesiapan peserta didik.",
+              "peserta_didik": "Uraian sangat detail mengenai kompetensi awal, prasyarat, gaya belajar, dan kesiapan peserta didik. Buat subjudul terstruktur dengan diakhiri tanda titik dua (:).",
               "materi_esensial": "Uraian sangat detail mengenai materi esensial, konsep utama, dan relevansi dunia nyata/industri.",
               "dimensi_profil_lulusan": "Sebutkan pilihan DPL yang relevan saja (misal 2 atau 3 DPL) yang paling sesuai dengan topik ini, lengkap dengan kotak centang ☐ pada masing-masing pilihan terpilih serta deskripsi singkat penerapannya.",
               "desain_pembelajaran": "Uraian rinci desain pembelajaran mendalam mencakup praktik pedagogik, kemitraan, lingkungan belajar, dan integrasi digital.",
-              "pengalaman_belajar_1": "Uraian rinci Pertemuan 1 yang mencakup Kegiatan Awal (berkesan/bermakna), Kegiatan Inti (eksplorasi/aplikasi), dan Kegiatan Penutup/Refleksi.",
-              "pengalaman_belajar_2": "Uraian rinci Pertemuan 2 yang mencakup Kegiatan Awal, Kegiatan Inti (lanjutan/praktik), dan Kegiatan Penutup/Refleksi.",
+              "pengalaman_belajar_1": "Uraian rinci Pertemuan 1 yang mencakup Kegiatan Awal, Kegiatan Inti, dan Kegiatan Penutup/Refleksi.",
+              "pengalaman_belajar_2": "Uraian rinci Pertemuan 2 yang mencakup Kegiatan Awal, Kegiatan Inti, dan Kegiatan Penutup/Refleksi.",
               "asesmen_rubrik": "Uraian rinci asesmen diagnostik, formatif, sumatif, beserta matriks rubrik penilaian unjuk kerja yang operasional dan lengkap."
             }}
             """
@@ -515,8 +542,8 @@ if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
           "Modul Ajar Komprehensif Berbasis Format Tabel Berhasil Disusun!"
       )
       st.info(
-          "Dokumen Word (.docx) siap diunduh dengan perataan rata kiri dan"
-          " sub-bagian tercetak tebal."
+          "Dokumen Word (.docx) siap diunduh dengan kolom kiri berwarna,"
+          " identitas kanan normal, serta sub-bagian tercetak tebal."
       )
 
       docx_file = generate_docx(
