@@ -222,7 +222,7 @@ def set_cell_background(cell, fill_color):
   cell._tc.get_or_add_tcPr().append(shading_elm)
 
 
-# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks sesuai sistematika baru
+# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks sesuai permintaan
 def generate_docx(
     data_ai,
     nama_sekolah,
@@ -487,25 +487,108 @@ def generate_docx(
   ]
   add_section_table("ASESMEN PEMBELAJARAN", tabel_asesmen)
 
-  # 8. Rubrik Penilaian & Pedoman Penskoran
-  tabel_rubrik = [
-      (
-          "Rubrik Penilaian",
-          data_ai.get(
-              "rubrik_penilaian",
-              "Matriks penilaian unjuk kerja (Perlu Bimbingan, Cukup, Baik,"
-              " Sangat Baik).",
-          ),
-      ),
-      (
-          "Pedoman Penskoran",
-          data_ai.get(
-              "pedoman_penskoran",
-              "Rumus Nilai Akhir = (Skor Perolehan / Skor Maksimal) * 100",
-          ),
-      ),
-  ]
-  add_section_table("RUBRIK PENILAIAN & PEDOMAN PENSKORAN", tabel_rubrik)
+  # 8. Rubrik Penilaian & Pedoman Penskoran (Dibuat di bawah tabel agar rapi)
+  table_rubrik_hdr = doc.add_table(rows=1, cols=2)
+  table_rubrik_hdr.style = "Table Grid"
+  table_rubrik_hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
+  hdr_cells = table_rubrik_hdr.rows[0].cells
+  hdr_cells[0].merge(hdr_cells[1])
+  hdr_cells[0].text = "RUBRIK PENILAIAN & PEDOMAN PENSKORAN"
+  set_cell_background(hdr_cells[0], "FFE599")
+  for p in hdr_cells[0].paragraphs:
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.paragraph_format.space_before = Pt(4)
+    p.paragraph_format.space_after = Pt(4)
+    for run in p.runs:
+      run.font.bold = True
+      run.font.size = Pt(10)
+      run.font.color.rgb = RGBColor(51, 51, 51)
+
+  # Menampilkan Rubrik Penilaian di Bawah Tabel secara Terstruktur & Rapi
+  rubrik_data = data_ai.get("rubrik_penilaian", "")
+  p_sub = doc.add_paragraph()
+  p_sub.paragraph_format.space_before = Pt(6)
+  p_sub.paragraph_format.space_after = Pt(4)
+  run_sub = p_sub.add_run("A. Rubrik Penilaian Kinerja / Kompetensi")
+  run_sub.font.bold = True
+  run_sub.font.size = Pt(10)
+  run_sub.font.color.rgb = RGBColor(51, 51, 51)
+
+  if isinstance(rubrik_data, dict):
+    for k, v in rubrik_data.items():
+      if isinstance(v, dict):
+        nama = v.get("nama_kriteria", k)
+        pb = v.get("perlu_bimbingan", "")
+        c = v.get("cukup", "")
+        b = v.get("baik", "")
+        sb = v.get("sangat_baik", "")
+
+        p_crit = doc.add_paragraph()
+        p_crit.paragraph_format.space_before = Pt(4)
+        p_crit.paragraph_format.space_after = Pt(2)
+        p_crit.paragraph_format.left_indent = Inches(0.2)
+        r_nama = p_crit.add_run(f"• {nama}")
+        r_nama.font.bold = True
+        r_nama.font.size = Pt(10)
+
+        for level_name, level_desc in [
+            ("Perlu Bimbingan", pb),
+            ("Cukup", c),
+            ("Baik", b),
+            ("Sangat Baik", sb),
+        ]:
+          if level_desc:
+            p_lvl = doc.add_paragraph()
+            p_lvl.paragraph_format.space_before = Pt(1)
+            p_lvl.paragraph_format.space_after = Pt(2)
+            p_lvl.paragraph_format.left_indent = Inches(0.4)
+            r_l_name = p_lvl.add_run(f"- {level_name}: ")
+            r_l_name.font.bold = True
+            r_l_name.font.size = Pt(9.5)
+            r_l_desc = p_lvl.add_run(f"{level_desc}")
+            r_l_desc.font.bold = False
+            r_l_desc.font.size = Pt(9.5)
+  else:
+    p_rubrik = doc.add_paragraph()
+    p_rubrik.paragraph_format.space_before = Pt(4)
+    p_rubrik.paragraph_format.space_after = Pt(4)
+    p_rubrik.paragraph_format.left_indent = Inches(0.2)
+    r_desc = p_rubrik.add_run(str(rubrik_data))
+    r_desc.font.bold = False
+    r_desc.font.size = Pt(10)
+
+  # Pedoman Penskoran di Bawahnya
+  penskoran_data = data_ai.get("pedoman_penskoran", "")
+  p_score_title = doc.add_paragraph()
+  p_score_title.paragraph_format.space_before = Pt(8)
+  p_score_title.paragraph_format.space_after = Pt(4)
+  r_stitle = p_score_title.add_run("B. Pedoman Penskoran & Perhitungan Nilai")
+  r_stitle.font.bold = True
+  r_stitle.font.size = Pt(10)
+  r_stitle.font.color.rgb = RGBColor(51, 51, 51)
+
+  if isinstance(penskoran_data, dict):
+    for sk, sv in penskoran_data.items():
+      p_sval = doc.add_paragraph()
+      p_sval.paragraph_format.space_before = Pt(2)
+      p_sval.paragraph_format.space_after = Pt(2)
+      p_sval.paragraph_format.left_indent = Inches(0.2)
+      r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
+      r_sk.font.bold = True
+      r_sk.font.size = Pt(9.5)
+      r_sv = p_sval.add_run(f"{sv}")
+      r_sv.font.bold = False
+      r_sv.font.size = Pt(9.5)
+  else:
+    p_sval = doc.add_paragraph()
+    p_sval.paragraph_format.space_before = Pt(2)
+    p_sval.paragraph_format.space_after = Pt(4)
+    p_sval.paragraph_format.left_indent = Inches(0.2)
+    r_sv = p_sval.add_run(str(penskoran_data))
+    r_sv.font.bold = False
+    r_sv.font.size = Pt(10)
+
+  doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
   # Tanda Tangan / Pengesahan di Bagian Bawah
   p_sign = doc.add_paragraph()
@@ -568,8 +651,26 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
               "asesmen_awal": "Uraian asesmen awal untuk cek kesiapan belajar.",
               "asesmen_formatif": "Uraian asesmen proses/formatif pemantauan partisipasi.",
               "asesmen_sumatif": "Uraian asesmen akhir/sumatif evaluasi unjuk kerja.",
-              "rubrik_penilaian": "Matriks rubrik penilaian lengkap dari Perlu Bimbingan hingga Sangat Baik.",
-              "pedoman_penskoran": "Rumus perhitungan nilai akhir dan interval predikat."
+              "rubrik_penilaian": {{
+                "kriteria_1": {{
+                  "nama_kriteria": "Nama kriteria pertama sesuai kompetensi materi",
+                  "perlu_bimbingan": "Deskripsi tingkat perlu bimbingan",
+                  "cukup": "Deskripsi tingkat cukup",
+                  "baik": "Deskripsi tingkat baik",
+                  "sangat_baik": "Deskripsi tingkat sangat baik"
+                }},
+                "kriteria_2": {{
+                  "nama_kriteria": "Nama kriteria kedua",
+                  "perlu_bimbingan": "Deskripsi...",
+                  "cukup": "Deskripsi...",
+                  "baik": "Deskripsi...",
+                  "sangat_baik": "Deskripsi..."
+                }}
+              }},
+              "pedoman_penskoran": {{
+                "rumus_nilai": "Rumus perhitungan nilai akhir",
+                "kategori_predikat": "Interval nilai dan predikat kelulusan"
+              }}
             }}
             """
 
@@ -591,9 +692,10 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
 
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
-          "Dokumen Word (.docx) siap diunduh dengan struktur matriks lengkap:"
-          " Kolom kiri Bold penuh, kolom kanan reguler, dan Dimensi Profil"
-          " Lulusan hanya menampilkan yang dipilih saja."
+          "Dokumen Word (.docx) siap diunduh dengan struktur matriks rapi:"
+          " Kolom kiri Bold penuh, kolom kanan reguler, Dimensi Profil Lulusan"
+          " hanya menampilkan yang dipilih saja, serta Rubrik Penilaian dan"
+          " Pedoman Penskoran tersusun rapi di bawah tabel."
       )
 
       docx_file = generate_docx(
