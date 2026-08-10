@@ -20,7 +20,7 @@ def check_password():
   """Mengembalikan True jika pengguna memasukkan password yang benar."""
 
   def password_entered():
-    if st.session_state["password"] == "modulpm230371":
+    if st.session_state["password"] == "modulpmybs230371":
       st.session_state["password_correct"] = True
       del st.session_state["password"]
     else:
@@ -304,7 +304,7 @@ def generate_docx(
 
       # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Menebalkan (Bold) Sub-Bagian / Label Tertentu
       val_str = str(val).replace("LKPD", "LKM")
-      row_cells[1].text = ""  # Bersihkan default text
+      row_cells[1].text = ""
 
       lines = val_str.split("\n")
       for line_idx, line in enumerate(lines):
@@ -318,7 +318,6 @@ def generate_docx(
         p_right.paragraph_format.line_spacing = 1.15
         p_right.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-        # Jika baris mengandung tanda titik dua (:), buat bagian sebelum tanda titik dua menjadi BOLD
         if ":" in line:
           parts = line.split(":", 1)
           prefix = parts[0].strip() + ":"
@@ -513,7 +512,7 @@ def generate_docx(
   ]
   add_section_table("ASESMEN PEMBELAJARAN", tabel_asesmen)
 
-  # 8. Rubrik Penilaian & Pedoman Penskoran (Dibuat di bawah tabel agar rapi)
+  # 8. Rubrik Penilaian & Pedoman Penskoran (Di bawah tabel)
   table_rubrik_hdr = doc.add_table(rows=1, cols=2)
   table_rubrik_hdr.style = "Table Grid"
   table_rubrik_hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -530,7 +529,6 @@ def generate_docx(
       run.font.size = Pt(10)
       run.font.color.rgb = RGBColor(51, 51, 51)
 
-  # Menampilkan Rubrik Penilaian di Bawah Tabel secara Terstruktur & Rapi
   rubrik_data = data_ai.get("rubrik_penilaian", "")
   p_sub = doc.add_paragraph()
   p_sub.paragraph_format.space_before = Pt(6)
@@ -583,7 +581,6 @@ def generate_docx(
     r_desc.font.bold = False
     r_desc.font.size = Pt(10)
 
-  # Pedoman Penskoran di Bawahnya
   penskoran_data = data_ai.get("pedoman_penskoran", "")
   p_score_title = doc.add_paragraph()
   p_score_title.paragraph_format.space_before = Pt(8)
@@ -616,7 +613,7 @@ def generate_docx(
 
   doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-  # Tanda Tangan / Pengesahan di Bagian Bawah
+  # Tanda Tangan / Pengesahan Modul Ajar
   p_sign = doc.add_paragraph()
   p_sign.alignment = WD_ALIGN_PARAGRAPH.RIGHT
   p_sign.paragraph_format.space_before = Pt(14)
@@ -625,6 +622,71 @@ def generate_docx(
   run_name = p_sign.add_run(f"{nama_penulis}")
   run_name.font.bold = True
   p_sign.add_run(f"\nNIP. {nip_penulis}")
+
+  # ====================================================
+  # HALAMAN TERPISAH: LEMBAR KEGIATAN MURID (LKM)
+  # ====================================================
+  doc.add_page_break()
+
+  p_lkm_title = doc.add_paragraph()
+  p_lkm_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+  p_lkm_title.paragraph_format.space_before = Pt(0)
+  p_lkm_title.paragraph_format.space_after = Pt(12)
+  r_lkm_t = p_lkm_title.add_run("LEMBAR KEGIATAN MURID (LKM)")
+  r_lkm_t.font.name = "Arial"
+  r_lkm_t.font.size = Pt(13)
+  r_lkm_t.font.bold = True
+
+  # Identitas Lembar Kerja Siswa
+  table_id_lkm = doc.add_table(rows=2, cols=2)
+  table_id_lkm.style = "Table Grid"
+  table_id_lkm.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+  table_id_lkm.rows[0].cells[0].text = "Nama Kelompok / Peserta Didik:"
+  table_id_lkm.rows[0].cells[1].text = (
+      "........................................................................"
+  )
+  table_id_lkm.rows[1].cells[0].text = "Kelas / Fase:"
+  table_id_lkm.rows[1].cells[1].text = f"{fase_kelas}"
+
+  for row in table_id_lkm.rows:
+    row.cells[0].width = Inches(2.3)
+    row.cells[1].width = Inches(4.2)
+    set_cell_background(row.cells[0], "F2F5F9")
+    for cell in row.cells:
+      for p in cell.paragraphs:
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
+        for run in p.runs:
+          run.font.size = Pt(10)
+          run.font.bold = True
+
+  doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+  lkm_data = data_ai.get("lkm_content", {})
+  if isinstance(lkm_data, dict):
+    for lkm_k, lkm_v in lkm_data.items():
+      p_lkm_sec = doc.add_paragraph()
+      p_lkm_sec.paragraph_format.space_before = Pt(6)
+      p_lkm_sec.paragraph_format.space_after = Pt(2)
+      r_sec_title = p_lkm_sec.add_run(
+          f"• {lkm_k.replace('_', ' ').upper()}:"
+      )
+      r_sec_title.font.bold = True
+      r_sec_title.font.size = Pt(10.5)
+
+      p_lkm_val = doc.add_paragraph()
+      p_lkm_val.paragraph_format.space_before = Pt(1)
+      p_lkm_val.paragraph_format.space_after = Pt(6)
+      p_lkm_val.paragraph_format.left_indent = Inches(0.2)
+      r_sec_val = p_lkm_val.add_run(str(lkm_v).replace("LKPD", "LKM"))
+      r_sec_val.font.size = Pt(10)
+  else:
+    p_lkm_text = doc.add_paragraph()
+    p_lkm_text.paragraph_format.space_before = Pt(4)
+    p_lkm_text.paragraph_format.space_after = Pt(4)
+    r_lt = p_lkm_text.add_run(str(lkm_data).replace("LKPD", "LKM"))
+    r_lt.font.size = Pt(10)
 
   bio = BytesIO()
   doc.save(bio)
@@ -668,6 +730,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
                - Tahap Asesmen: [...]
             6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna). Gunakan istilah **LKM (Lembar Kegiatan Murid)** (BUKAN LKPD) di seluruh uraian.
             7. Asesmen Pembelajaran mencakup Asesmen Awal, Asesmen Proses (Formatif), dan Asesmen Akhir (Sumatif) beserta Rubrik Penilaian dan Pedoman Penskorannya.
+            8. **LKM (Lembar Kegiatan Murid)**: Sediakan konten LKM yang mendalam pada kunci `lkm_content` yang mencakup judul, tujuan, petunjuk kerja, serta langkah-langkah tugas/investigasi peserta didik yang siap digunakan di halaman terpisah.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
@@ -706,6 +769,12 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
               "pedoman_penskoran": {{
                 "rumus_nilai": "Rumus perhitungan nilai akhir",
                 "kategori_predikat": "Interval nilai dan predikat kelulusan"
+              }},
+              "lkm_content": {{
+                "judul_lkm": "Judul spesifik LKM",
+                "tujuan_lkm": "Tujuan pengerjaan LKM bagi peserta didik",
+                "petunjuk_kerja": "Langkah panduan keselamatan dan cara pengerjaan",
+                "tugas_analisis": "Rincian tugas investigasi, pertanyaan kerja, atau tabel isian praktik"
               }}
             }}
             """
@@ -728,10 +797,8 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
 
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
-          "Dokumen Word (.docx) siap diunduh dengan struktur matriks rapi:"
-          " Kolom kiri Bold penuh, sub-bagian kolom kanan Bold tegas, istilah"
-          " LKPD diganti LKM, serta Rubrik Penilaian dan Pedoman Penskoran"
-          " tersusun rapi di bawah tabel."
+          "Dokumen Word (.docx) siap diunduh lengkap dengan halaman terpisah"
+          " untuk Lembar Kegiatan Murid (LKM) di bagian paling bawah."
       )
 
       docx_file = generate_docx(
