@@ -292,6 +292,7 @@ def generate_docx(
 
       set_cell_background(row_cells[0], "F2F5F9")
 
+      # 1. Kolom Sebelah Kiri --> Bold Semua
       for p in row_cells[0].paragraphs:
         p.paragraph_format.space_before = Pt(4)
         p.paragraph_format.space_after = Pt(4)
@@ -302,44 +303,16 @@ def generate_docx(
           run.font.bold = True
           run.font.color.rgb = RGBColor(51, 51, 51)
 
+      # 2. Kolom Sebelah Kanan --> Tidak Perlu di-bold (Reguler Penuh)
       for p in row_cells[1].paragraphs:
         p.paragraph_format.space_before = Pt(4)
         p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.line_spacing = 1.15
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-        text_p = p.text.strip()
-        if title_text == "IDENTIFIKASI DAN INFORMASI UMUM":
-          for run in p.runs:
-            run.font.size = Pt(10)
-            run.font.bold = False
-            run.font.color.rgb = RGBColor(51, 51, 51)
-        else:
-          is_subheader = (
-              text_p.startswith("Model")
-              or text_p.startswith("Metode")
-              or text_p.startswith("Lingkungan")
-              or text_p.startswith("Ruang")
-              or text_p.startswith("Tahap")
-              or text_p.startswith("Kegiatan")
-              or text_p.startswith("Memahami")
-              or text_p.startswith("Mengaplikasi")
-              or text_p.startswith("Merefleksi")
-              or text_p.startswith("Asesmen")
-              or text_p.startswith("1.")
-              or text_p.startswith("2.")
-              or text_p.startswith("3.")
-              or text_p.startswith("4.")
-              or text_p.endswith(":")
-              or (len(text_p) < 85 and not text_p.endswith("."))
-          )
-          for run in p.runs:
-            run.font.size = Pt(10)
-            run.font.color.rgb = RGBColor(51, 51, 51)
-            if is_subheader:
-              run.font.bold = True
-            else:
-              run.font.bold = False
+        for run in p.runs:
+          run.font.size = Pt(10)
+          run.font.bold = False  # Memastikan kolom kanan tidak ada yang bold
+          run.font.color.rgb = RGBColor(51, 51, 51)
 
     doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
@@ -365,14 +338,10 @@ def generate_docx(
           "Dimensi Profil Lulusan",
           data_ai.get(
               "dimensi_profil_lulusan",
-              "☐ Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa\n"
-              "☐ Kewargaan\n"
-              "☑ Penalaran Kritis\n"
-              "☐ Kreativitas\n"
-              "☑ Kolaborasi\n"
-              "☐ Kemandirian\n"
-              "☐ Kesehatan\n"
-              "☑ Komunikasi",
+              "☑ Penalaran Kritis: Peserta didik dilatih menganalisis masalah"
+              " secara logis.\n☑ Kolaborasi: Bekerja sama dalam kelompok"
+              " investigasi.\n☑ Kemandirian: Bertanggung jawab atas tugas"
+              " mandiri.\n☑ Komunikasi: Mempresentasikan hasil kerja.",
           ),
       ),
   ]
@@ -573,7 +542,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
             - Pertemuan Ke-: {pertemuan_ke}
 
             Ketentuan Penting:
-            1. Dimensi Profil Lulusan (Pilih 2 atau 4 yang paling relevan dari 8 dimensi berikut dan beri tanda centang ☑ pada yang dipilih dan ☐ pada yang tidak dipilih: Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi).
+            1. Dimensi Profil Lulusan: Pilih 2 hingga 4 dimensi yang PALING RELEVAN dari 8 dimensi berikut (Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi). **SANGAT PENTING: Tuliskan dan tampilkan HANYA dimensi yang dipilih saja (dengan tanda centang ☑ dan uraian penjelasannya). JANGAN SAMA SEKALI menyebutkan atau menuliskan daftar dimensi lain yang tidak dipilih/tidak digunakan.**
             2. Praktik Pedagogis (Gunakan salah satu model: Problem Based Learning / Discovery Learning / Inquiri / Project Based Learning, serta metode pembelajaran pendukung minimal 2-3 metode).
             3. Kemitraan Pembelajaran (Lingkungan Sekolah & Lingkungan Luar Sekolah).
             4. Lingkungan Belajar (Ruang Fisik, Ruang Virtual, Ruang/Budaya Belajar).
@@ -583,7 +552,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
-              "dimensi_profil_lulusan": "Daftar 8 DPL dengan tanda centang ☑ pada yang dipilih dan ☐ pada yang lain beserta uraian singkat penerapannya.",
+              "dimensi_profil_lulusan": "Hanya tuliskan dimensi profil lulusan yang dipilih saja (gunakan tanda ☑) beserta uraian penerapannya. JANGAN menuliskan dimensi yang tidak dipilih.",
               "tujuan_pembelajaran": "Uraian tujuan pembelajaran yang spesifik, operasional, dan terukur sesuai materi.",
               "pemahaman_bermakna": "Uraian pemahaman bermakna yang mendalam terkait materi.",
               "pertanyaan_pemantik": "2 pertanyaan pemantik yang kontekstual dan menantang daya nalar kritis siswa.",
@@ -622,8 +591,9 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
 
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
-          "Dokumen Word (.docx) siap diunduh dengan struktur matriks lengkap,"
-          " kolom kiri berwarna, dan format rapi."
+          "Dokumen Word (.docx) siap diunduh dengan struktur matriks lengkap:"
+          " Kolom kiri Bold penuh, kolom kanan reguler, dan Dimensi Profil"
+          " Lulusan hanya menampilkan yang dipilih saja."
       )
 
       docx_file = generate_docx(
