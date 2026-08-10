@@ -562,7 +562,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
   else:
     with st.spinner("Gemini sedang menyusun Modul Ajar Komprehensif..."):
       genai.configure(api_key=api_key)
-      model = genai.GenerativeModel("gemini-1.5-flash")
+      model = genai.GenerativeModel("gemini-3.5-flash")
 
       prompt = f"""
             Bertindaklah sebagai pakar kurikulum profesional. Buatkan konten Modul Ajar Berbasis Pembelajaran Mendalam (Deep Learning) yang **SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF** untuk:
