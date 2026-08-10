@@ -20,7 +20,7 @@ def check_password():
   """Mengembalikan True jika pengguna memasukkan password yang benar."""
 
   def password_entered():
-    if st.session_state["password"] == "modulpmybs230371":
+    if st.session_state["password"] == "ModulPM300869":
       st.session_state["password_correct"] = True
       del st.session_state["password"]
     else:
@@ -303,7 +303,7 @@ def generate_docx(
           run.font.color.rgb = RGBColor(51, 51, 51)
 
       # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Menebalkan (Bold) Sub-Bagian / Label Tertentu
-      val_str = str(val).replace("LKPD", "LKM")
+      val_str = str(val).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
       row_cells[1].text = ""
 
       lines = val_str.split("\n")
@@ -569,7 +569,7 @@ def generate_docx(
             r_l_name = p_lvl.add_run(f"- {level_name}: ")
             r_l_name.font.bold = True
             r_l_name.font.size = Pt(9.5)
-            r_l_desc = p_lvl.add_run(f"{str(level_desc).replace('LKPD', 'LKM')}")
+            r_l_desc = p_lvl.add_run(f"{str(level_desc).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}")
             r_l_desc.font.bold = False
             r_l_desc.font.size = Pt(9.5)
   else:
@@ -577,7 +577,7 @@ def generate_docx(
     p_rubrik.paragraph_format.space_before = Pt(4)
     p_rubrik.paragraph_format.space_after = Pt(4)
     p_rubrik.paragraph_format.left_indent = Inches(0.2)
-    r_desc = p_rubrik.add_run(str(rubrik_data).replace("LKPD", "LKM"))
+    r_desc = p_rubrik.add_run(str(rubrik_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
     r_desc.font.bold = False
     r_desc.font.size = Pt(10)
 
@@ -599,7 +599,7 @@ def generate_docx(
       r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
       r_sk.font.bold = True
       r_sk.font.size = Pt(9.5)
-      r_sv = p_sval.add_run(f"{str(sv).replace('LKPD', 'LKM')}")
+      r_sv = p_sval.add_run(f"{str(sv).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}")
       r_sv.font.bold = False
       r_sv.font.size = Pt(9.5)
   else:
@@ -607,7 +607,7 @@ def generate_docx(
     p_sval.paragraph_format.space_before = Pt(2)
     p_sval.paragraph_format.space_after = Pt(4)
     p_sval.paragraph_format.left_indent = Inches(0.2)
-    r_sv = p_sval.add_run(str(penskoran_data).replace("LKPD", "LKM"))
+    r_sv = p_sval.add_run(str(penskoran_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
     r_sv.font.bold = False
     r_sv.font.size = Pt(10)
 
@@ -624,7 +624,7 @@ def generate_docx(
   p_sign.add_run(f"\nNIP. {nip_penulis}")
 
   # ====================================================
-  # HALAMAN TERPISAH: LEMBAR KEGIATAN MURID (LKM)
+  # HALAMAN TERPISAH: LEMBAR KERJA MURID (LKM) DALAM BENTUK TABEL RAPI
   # ====================================================
   doc.add_page_break()
 
@@ -632,13 +632,13 @@ def generate_docx(
   p_lkm_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
   p_lkm_title.paragraph_format.space_before = Pt(0)
   p_lkm_title.paragraph_format.space_after = Pt(12)
-  r_lkm_t = p_lkm_title.add_run("LEMBAR KEGIATAN MURID (LKM)")
+  r_lkm_t = p_lkm_title.add_run("LEMBAR KERJA MURID (LKM)")
   r_lkm_t.font.name = "Arial"
   r_lkm_t.font.size = Pt(13)
   r_lkm_t.font.bold = True
 
-  # Identitas Lembar Kerja Siswa
-  table_id_lkm = doc.add_table(rows=2, cols=2)
+  # Identitas Lembar Kerja Siswa dalam Tabel
+  table_id_lkm = doc.add_table(rows=3, cols=2)
   table_id_lkm.style = "Table Grid"
   table_id_lkm.alignment = WD_TABLE_ALIGNMENT.CENTER
 
@@ -648,6 +648,8 @@ def generate_docx(
   )
   table_id_lkm.rows[1].cells[0].text = "Kelas / Fase:"
   table_id_lkm.rows[1].cells[1].text = f"{fase_kelas}"
+  table_id_lkm.rows[2].cells[0].text = "Mata Pelajaran / Topik:"
+  table_id_lkm.rows[2].cells[1].text = f"{mata_pelajaran} - {topik}"
 
   for row in table_id_lkm.rows:
     row.cells[0].width = Inches(2.3)
@@ -661,31 +663,28 @@ def generate_docx(
           run.font.size = Pt(10)
           run.font.bold = True
 
-  doc.add_paragraph().paragraph_format.space_after = Pt(8)
+  doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
+  # Tabel Konten Utama LKM
   lkm_data = data_ai.get("lkm_content", {})
-  if isinstance(lkm_data, dict):
+  if isinstance(lkm_data, dict) and lkm_data:
+    lkm_rows = []
     for lkm_k, lkm_v in lkm_data.items():
-      p_lkm_sec = doc.add_paragraph()
-      p_lkm_sec.paragraph_format.space_before = Pt(6)
-      p_lkm_sec.paragraph_format.space_after = Pt(2)
-      r_sec_title = p_lkm_sec.add_run(
-          f"• {lkm_k.replace('_', ' ').upper()}:"
+      label_text = (
+          lkm_k.replace("_", " ")
+          .title()
+          .replace("Lkm", "LKM")
+          .replace("Judul", "Judul LKM")
+          .replace("Tujuan", "Tujuan Pembelajaran")
       )
-      r_sec_title.font.bold = True
-      r_sec_title.font.size = Pt(10.5)
+      lkm_rows.append((label_text, str(lkm_v)))
 
-      p_lkm_val = doc.add_paragraph()
-      p_lkm_val.paragraph_format.space_before = Pt(1)
-      p_lkm_val.paragraph_format.space_after = Pt(6)
-      p_lkm_val.paragraph_format.left_indent = Inches(0.2)
-      r_sec_val = p_lkm_val.add_run(str(lkm_v).replace("LKPD", "LKM"))
-      r_sec_val.font.size = Pt(10)
+    add_section_table("STRUKTUR LEMBAR KERJA MURID (LKM)", lkm_rows)
   else:
     p_lkm_text = doc.add_paragraph()
     p_lkm_text.paragraph_format.space_before = Pt(4)
     p_lkm_text.paragraph_format.space_after = Pt(4)
-    r_lt = p_lkm_text.add_run(str(lkm_data).replace("LKPD", "LKM"))
+    r_lt = p_lkm_text.add_run(str(lkm_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
     r_lt.font.size = Pt(10)
 
   bio = BytesIO()
@@ -728,9 +727,9 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
                - Tahap Perencanaan: [...]
                - Tahap Pelaksanaan: [...]
                - Tahap Asesmen: [...]
-            6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna). Gunakan istilah **LKM (Lembar Kegiatan Murid)** (BUKAN LKPD) di seluruh uraian.
+            6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna). Gunakan istilah **LKM (Lembar Kerja Murid)** (BUKAN LKPD atau Lembar Kegiatan Murid) di seluruh uraian.
             7. Asesmen Pembelajaran mencakup Asesmen Awal, Asesmen Proses (Formatif), dan Asesmen Akhir (Sumatif) beserta Rubrik Penilaian dan Pedoman Penskorannya.
-            8. **LKM (Lembar Kegiatan Murid)**: Sediakan konten LKM yang mendalam pada kunci `lkm_content` yang mencakup judul, tujuan, petunjuk kerja, serta langkah-langkah tugas/investigasi peserta didik yang siap digunakan di halaman terpisah.
+            8. **LKM (Lembar Kerja Murid)**: Sediakan konten LKM yang mendalam pada kunci `lkm_content` yang mencakup judul, tujuan, petunjuk kerja, serta langkah-langkah tugas/investigasi peserta didik yang terstruktur rapi dengan sub-bagian penting bertanda titik dua agar mudah ditebalkan di halaman terpisah.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
@@ -773,8 +772,8 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
               "lkm_content": {{
                 "judul_lkm": "Judul spesifik LKM",
                 "tujuan_lkm": "Tujuan pengerjaan LKM bagi peserta didik",
-                "petunjuk_kerja": "Langkah panduan keselamatan dan cara pengerjaan",
-                "tugas_analisis": "Rincian tugas investigasi, pertanyaan kerja, atau tabel isian praktik"
+                "petunjuk_kerja": "Langkah panduan keselamatan dan cara pengerjaan dengan format sub-bagian berlabel titik dua (misal: 1. Alat dan Bahan: ...\\n2. Langkah Kerja: ...)",
+                "tugas_analisis": "Rincian tugas investigasi, pertanyaan kerja, atau tabel isian praktik dengan format sub-bagian jelas"
               }}
             }}
             """
@@ -798,7 +797,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
           "Dokumen Word (.docx) siap diunduh lengkap dengan halaman terpisah"
-          " untuk Lembar Kegiatan Murid (LKM) di bagian paling bawah."
+          " untuk Lembar Kerja Murid (LKM) berbentuk tabel rapi di bagian paling bawah."
       )
 
       docx_file = generate_docx(
