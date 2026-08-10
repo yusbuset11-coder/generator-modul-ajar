@@ -193,9 +193,7 @@ with st.sidebar:
   )
 
   st.caption(jp_guidance)
-  alokasi_waktu = st.text_input(
-      "Alokasi Waktu", "2 JP (2 x 45 Menit)"
-  )
+  alokasi_waktu = st.text_input("Alokasi Waktu", "2 JP (2 x 45 Menit)")
   pertemuan_ke = st.text_input("Pertemuan Ke-", "1 (Pertemuan Pertama)")
 
   st.markdown("---")
@@ -303,7 +301,9 @@ def generate_docx(
           run.font.color.rgb = RGBColor(51, 51, 51)
 
       # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Menebalkan (Bold) Sub-Bagian / Label Tertentu
-      val_str = str(val).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
+      val_str = str(val).replace("LKPD", "LKM").replace(
+          "Lembar Kegiatan Murid", "Lembar Kerja Murid"
+      )
       row_cells[1].text = ""
 
       lines = val_str.split("\n")
@@ -569,7 +569,9 @@ def generate_docx(
             r_l_name = p_lvl.add_run(f"- {level_name}: ")
             r_l_name.font.bold = True
             r_l_name.font.size = Pt(9.5)
-            r_l_desc = p_lvl.add_run(f"{str(level_desc).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}")
+            r_l_desc = p_lvl.add_run(
+                f"{str(level_desc).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}"
+            )
             r_l_desc.font.bold = False
             r_l_desc.font.size = Pt(9.5)
   else:
@@ -577,7 +579,11 @@ def generate_docx(
     p_rubrik.paragraph_format.space_before = Pt(4)
     p_rubrik.paragraph_format.space_after = Pt(4)
     p_rubrik.paragraph_format.left_indent = Inches(0.2)
-    r_desc = p_rubrik.add_run(str(rubrik_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
+    r_desc = p_rubrik.add_run(
+        str(rubrik_data)
+        .replace("LKPD", "LKM")
+        .replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
+    )
     r_desc.font.bold = False
     r_desc.font.size = Pt(10)
 
@@ -599,7 +605,9 @@ def generate_docx(
       r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
       r_sk.font.bold = True
       r_sk.font.size = Pt(9.5)
-      r_sv = p_sval.add_run(f"{str(sv).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}")
+      r_sv = p_sval.add_run(
+          f"{str(sv).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}"
+      )
       r_sv.font.bold = False
       r_sv.font.size = Pt(9.5)
   else:
@@ -607,7 +615,11 @@ def generate_docx(
     p_sval.paragraph_format.space_before = Pt(2)
     p_sval.paragraph_format.space_after = Pt(4)
     p_sval.paragraph_format.left_indent = Inches(0.2)
-    r_sv = p_sval.add_run(str(penskoran_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
+    r_sv = p_sval.add_run(
+        str(penskoran_data)
+        .replace("LKPD", "LKM")
+        .replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
+    )
     r_sv.font.bold = False
     r_sv.font.size = Pt(10)
 
@@ -624,7 +636,74 @@ def generate_docx(
   p_sign.add_run(f"\nNIP. {nip_penulis}")
 
   # ====================================================
-  # HALAMAN TERPISAH: LEMBAR KERJA MURID (LKM) DALAM BENTUK TABEL RAPI
+  # HALAMAN TERPISAH 1: INSTRUMEN ASESMEN PROSES (FORMATIF)
+  # ====================================================
+  doc.add_page_break()
+
+  p_inst_title = doc.add_paragraph()
+  p_inst_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+  p_inst_title.paragraph_format.space_before = Pt(0)
+  p_inst_title.paragraph_format.space_after = Pt(12)
+  r_inst_t = p_inst_title.add_run("INSTRUMEN ASESMEN PROSES (FORMATIF)")
+  r_inst_t.font.name = "Arial"
+  r_inst_t.font.size = Pt(13)
+  r_inst_t.font.bold = True
+
+  # Identitas Instrumen Asesmen dalam Tabel
+  table_id_inst = doc.add_table(rows=3, cols=2)
+  table_id_inst.style = "Table Grid"
+  table_id_inst.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+  table_id_inst.rows[0].cells[0].text = "Nama Guru / Pengamat:"
+  table_id_inst.rows[0].cells[1].text = f"{nama_penulis}"
+  table_id_inst.rows[1].cells[0].text = "Kelas / Fase:"
+  table_id_inst.rows[1].cells[1].text = f"{fase_kelas}"
+  table_id_inst.rows[2].cells[0].text = "Mata Pelajaran / Topik:"
+  table_id_inst.rows[2].cells[1].text = f"{mata_pelajaran} - {topik}"
+
+  for row in table_id_inst.rows:
+    row.cells[0].width = Inches(2.3)
+    row.cells[1].width = Inches(4.2)
+    set_cell_background(row.cells[0], "F2F5F9")
+    for cell in row.cells:
+      for p in cell.paragraphs:
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
+        for run in p.runs:
+          run.font.size = Pt(10)
+          run.font.bold = True
+
+  doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+  # Tabel Konten Utama Instrumen Asesmen Formatif
+  instrumen_data = data_ai.get("instrumen_formatif", {})
+  if isinstance(instrumen_data, dict) and instrumen_data:
+    inst_rows = []
+    for inst_k, inst_v in instrumen_data.items():
+      label_text = (
+          inst_k.replace("_", " ")
+          .title()
+          .replace("Instrumen", "Instrumen Asesmen")
+          .replace("Tujuan", "Tujuan Asesmen")
+      )
+      inst_rows.append((label_text, str(inst_v)))
+
+    add_section_table("LEMBAR OBSERVASI / FORMATIF KELAS", inst_rows)
+  else:
+    p_inst_text = doc.add_paragraph()
+    p_inst_text.paragraph_format.space_before = Pt(4)
+    p_inst_text.paragraph_format.space_after = Pt(4)
+    r_it = p_inst_text.add_run(
+        str(instrumen_data)
+        .replace("LKPD", "LKM")
+        .replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
+    )
+    r_it.font.size = Pt(10)
+
+  doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+  # ====================================================
+  # HALAMAN TERPISAH 2: LEMBAR KERJA MURID (LKM) DALAM BENTUK TABEL RAPI
   # ====================================================
   doc.add_page_break()
 
@@ -684,7 +763,11 @@ def generate_docx(
     p_lkm_text = doc.add_paragraph()
     p_lkm_text.paragraph_format.space_before = Pt(4)
     p_lkm_text.paragraph_format.space_after = Pt(4)
-    r_lt = p_lkm_text.add_run(str(lkm_data).replace("LKPD", "LKM").replace("Lembar Kegiatan Murid", "Lembar Kerja Murid"))
+    r_lt = p_lkm_text.add_run(
+        str(lkm_data)
+        .replace("LKPD", "LKM")
+        .replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
+    )
     r_lt.font.size = Pt(10)
 
   bio = BytesIO()
@@ -693,7 +776,7 @@ def generate_docx(
   return bio
 
 
-if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
+if st.button("🚀 Buat Modul Ajar Pembelajaran Mendalam"):
   if not api_key:
     st.error("Mohon masukkan Google Gemini API Key terlebih dahulu.")
   elif not topik:
@@ -729,7 +812,8 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
                - Tahap Asesmen: [...]
             6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna). Gunakan istilah **LKM (Lembar Kerja Murid)** (BUKAN LKPD atau Lembar Kegiatan Murid) di seluruh uraian.
             7. Asesmen Pembelajaran mencakup Asesmen Awal, Asesmen Proses (Formatif), dan Asesmen Akhir (Sumatif) beserta Rubrik Penilaian dan Pedoman Penskorannya.
-            8. **LKM (Lembar Kerja Murid)**: Sediakan konten LKM yang mendalam pada kunci `lkm_content` yang mencakup judul, tujuan, petunjuk kerja, serta langkah-langkah tugas/investigasi peserta didik yang terstruktur rapi dengan sub-bagian penting bertanda titik dua agar mudah ditebalkan di halaman terpisah.
+            8. **Instrumen Asesmen Proses (Formatif)**: Sediakan instrumen asesmen proses/formatif yang mendalam (seperti lembar observasi keaktifan, catatan anekdotal, atau rubrik formatif aktivitas siswa) pada kunci `instrumen_formatif` yang terstruktur dengan sub-bagian penting bertanda titik dua agar mudah disajikan dalam bentuk tabel rapi pada halaman khusus sebelum LKM.
+            9. **LKM (Lembar Kerja Murid)**: Sediakan konten LKM yang mendalam pada kunci `lkm_content` yang mencakup judul, tujuan, petunjuk kerja, serta langkah-langkah tugas/investigasi peserta didik yang terstruktur rapi dengan sub-bagian penting bertanda titik dua agar mudah ditebalkan di halaman terpisah paling akhir.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
@@ -769,6 +853,12 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
                 "rumus_nilai": "Rumus perhitungan nilai akhir",
                 "kategori_predikat": "Interval nilai dan predikat kelulusan"
               }},
+              "instrumen_formatif": {{
+                "judul_instrumen": "Judul spesifik instrumen asesmen proses",
+                "tujuan_asesmen": "Tujuan penggunaan lembar asesmen formatif",
+                "aspek_yang_diamati": "Indikator atau aspek keaktifan/proses yang dinilai dengan format sub-bagian berlabel titik dua (misal: 1. Keaktifan Diskusi: ...\\n2. Kolaborasi Tim: ...)",
+                "pedoman_pengamatan": "Petunjuk penilaian atau rubrik ceklis observasi singkat"
+              }},
               "lkm_content": {{
                 "judul_lkm": "Judul spesifik LKM",
                 "tujuan_lkm": "Tujuan pengerjaan LKM bagi peserta didik",
@@ -797,7 +887,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
           "Dokumen Word (.docx) siap diunduh lengkap dengan halaman terpisah"
-          " untuk Lembar Kerja Murid (LKM) berbentuk tabel rapi di bagian paling bawah."
+          " untuk Instrumen Asesmen Proses (Formatif) dan Lembar Kerja Murid (LKM) dalam bentuk tabel matriks rapi."
       )
 
       docx_file = generate_docx(
@@ -817,7 +907,7 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
       )
 
       st.download_button(
-          label="📥 Unduh Modul Ajar Format Tabel Matriks (.docx)",
+          label="📥 Unduh Modul Ajar Pembelajaran Mendalam (.docx)",
           data=docx_file,
           file_name=f"Modul_Ajar_{topik.replace(' ', '_')}.docx",
           mime=(
