@@ -286,7 +286,6 @@ def generate_docx(
     for idx, (label, val) in enumerate(rows_data):
       row_cells = table.rows[idx + 1].cells
       row_cells[0].text = label
-      row_cells[1].text = str(val)
       row_cells[0].width = Inches(2.3)
       row_cells[1].width = Inches(4.2)
 
@@ -303,16 +302,42 @@ def generate_docx(
           run.font.bold = True
           run.font.color.rgb = RGBColor(51, 51, 51)
 
-      # 2. Kolom Sebelah Kanan --> Tidak Perlu di-bold (Reguler Penuh)
-      for p in row_cells[1].paragraphs:
-        p.paragraph_format.space_before = Pt(4)
-        p.paragraph_format.space_after = Pt(4)
-        p.paragraph_format.line_spacing = 1.15
-        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        for run in p.runs:
-          run.font.size = Pt(10)
-          run.font.bold = False  # Memastikan kolom kanan tidak ada yang bold
-          run.font.color.rgb = RGBColor(51, 51, 51)
+      # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Menebalkan (Bold) Sub-Bagian / Label Tertentu
+      val_str = str(val).replace("LKPD", "LKM")
+      row_cells[1].text = ""  # Bersihkan default text
+
+      lines = val_str.split("\n")
+      for line_idx, line in enumerate(lines):
+        if line_idx == 0:
+          p_right = row_cells[1].paragraphs[0]
+        else:
+          p_right = row_cells[1].add_paragraph()
+
+        p_right.paragraph_format.space_before = Pt(4)
+        p_right.paragraph_format.space_after = Pt(4)
+        p_right.paragraph_format.line_spacing = 1.15
+        p_right.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        # Jika baris mengandung tanda titik dua (:), buat bagian sebelum tanda titik dua menjadi BOLD
+        if ":" in line:
+          parts = line.split(":", 1)
+          prefix = parts[0].strip() + ":"
+          content = parts[1].strip()
+
+          r_prefix = p_right.add_run(prefix + " ")
+          r_prefix.font.size = Pt(10)
+          r_prefix.font.bold = True
+          r_prefix.font.color.rgb = RGBColor(51, 51, 51)
+
+          r_content = p_right.add_run(content)
+          r_content.font.size = Pt(10)
+          r_content.font.bold = False
+          r_content.font.color.rgb = RGBColor(51, 51, 51)
+        else:
+          r_normal = p_right.add_run(line)
+          r_normal.font.size = Pt(10)
+          r_normal.font.bold = False
+          r_normal.font.color.rgb = RGBColor(51, 51, 51)
 
     doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
@@ -387,16 +412,17 @@ def generate_docx(
           "Praktik Pedagogis",
           data_ai.get(
               "praktik_pedagogis",
-              "Model: Problem Based Learning\nMetode: Diskusi, Tanya Jawab,"
-              " Analisis Teks",
+              "Model Pembelajaran: Problem Based Learning\nMetode"
+              " Pembelajaran Pendukung: Diskusi, Tanya Jawab, Analisis Teks",
           ),
       ),
       (
           "Kemitraan Pembelajaran",
           data_ai.get(
               "kemitraan_pembelajaran",
-              "Lingkungan Sekolah: Kolaborasi guru mapel produktif.\nLingkungan"
-              " Luar Sekolah: Pemanfaatan data/narasumber instansi terkait.",
+              "Kemitraan Lingkungan Sekolah: Kolaborasi guru mapel"
+              " produktif.\nKemitraan Lingkungan Luar Sekolah: Pemanfaatan"
+              " data/narasumber instansi terkait.",
           ),
       ),
       (
@@ -404,7 +430,7 @@ def generate_docx(
           data_ai.get(
               "lingkungan_belajar",
               "Ruang Fisik: Kelas fleksibel dan kolaboratif.\nRuang Virtual:"
-              " Google Drive / LMS Sekolah.\nRuang/Budaya Belajar: Kolaboratif,"
+              " Google Drive / LMS Sekolah.\nBudaya Belajar: Kolaboratif,"
               " Berpikir Kritis, Keterbukaan.",
           ),
       ),
@@ -440,7 +466,7 @@ def generate_docx(
           "Kegiatan Inti (Mengaplikasi)",
           data_ai.get(
               "kegiatan_mengaplikasi",
-              "Penyelidikan kolaboratif dan penerapan konsep dalam LKPD.",
+              "Penyelidikan kolaboratif dan penerapan konsep dalam LKM.",
           ),
       ),
       (
@@ -545,7 +571,7 @@ def generate_docx(
             r_l_name = p_lvl.add_run(f"- {level_name}: ")
             r_l_name.font.bold = True
             r_l_name.font.size = Pt(9.5)
-            r_l_desc = p_lvl.add_run(f"{level_desc}")
+            r_l_desc = p_lvl.add_run(f"{str(level_desc).replace('LKPD', 'LKM')}")
             r_l_desc.font.bold = False
             r_l_desc.font.size = Pt(9.5)
   else:
@@ -553,7 +579,7 @@ def generate_docx(
     p_rubrik.paragraph_format.space_before = Pt(4)
     p_rubrik.paragraph_format.space_after = Pt(4)
     p_rubrik.paragraph_format.left_indent = Inches(0.2)
-    r_desc = p_rubrik.add_run(str(rubrik_data))
+    r_desc = p_rubrik.add_run(str(rubrik_data).replace("LKPD", "LKM"))
     r_desc.font.bold = False
     r_desc.font.size = Pt(10)
 
@@ -576,7 +602,7 @@ def generate_docx(
       r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
       r_sk.font.bold = True
       r_sk.font.size = Pt(9.5)
-      r_sv = p_sval.add_run(f"{sv}")
+      r_sv = p_sval.add_run(f"{str(sv).replace('LKPD', 'LKM')}")
       r_sv.font.bold = False
       r_sv.font.size = Pt(9.5)
   else:
@@ -584,7 +610,7 @@ def generate_docx(
     p_sval.paragraph_format.space_before = Pt(2)
     p_sval.paragraph_format.space_after = Pt(4)
     p_sval.paragraph_format.left_indent = Inches(0.2)
-    r_sv = p_sval.add_run(str(penskoran_data))
+    r_sv = p_sval.add_run(str(penskoran_data).replace("LKPD", "LKM"))
     r_sv.font.bold = False
     r_sv.font.size = Pt(10)
 
@@ -626,11 +652,21 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
 
             Ketentuan Penting:
             1. Dimensi Profil Lulusan: Pilih 2 hingga 4 dimensi yang PALING RELEVAN dari 8 dimensi berikut (Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi). **SANGAT PENTING: Tuliskan dan tampilkan HANYA dimensi yang dipilih saja (dengan tanda centang ☑ dan uraian penjelasannya). JANGAN SAMA SEKALI menyebutkan atau menuliskan daftar dimensi lain yang tidak dipilih/tidak digunakan.**
-            2. Praktik Pedagogis (Gunakan salah satu model: Problem Based Learning / Discovery Learning / Inquiri / Project Based Learning, serta metode pembelajaran pendukung minimal 2-3 metode).
-            3. Kemitraan Pembelajaran (Lingkungan Sekolah & Lingkungan Luar Sekolah).
-            4. Lingkungan Belajar (Ruang Fisik, Ruang Virtual, Ruang/Budaya Belajar).
-            5. Pemanfaatan Digital (Tahap Perencanaan, Tahap Pelaksanaan, Tahap Asesmen).
-            6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna).
+            2. Praktik Pedagogis: Gunakan format label persis berikut (dengan tanda titik dua):
+               - Model Pembelajaran: [Uraian model seperti Problem Based Learning / Discovery Learning / dll]
+               - Metode Pembelajaran Pendukung: [Uraian metode, misal 1. Studi Kasus Riil: ... 2. Demonstrasi Interaktif: ... dst]
+            3. Kemitraan Pembelajaran: Gunakan format label persis berikut:
+               - Kemitraan Lingkungan Sekolah: [...]
+               - Kemitraan Lingkungan Luar Sekolah: [...]
+            4. Lingkungan Belajar: Gunakan format label persis berikut:
+               - Ruang Fisik: [...]
+               - Ruang Virtual: [...]
+               - Budaya Belajar: [...]
+            5. Pemanfaatan Digital: Gunakan format label persis berikut:
+               - Tahap Perencanaan: [...]
+               - Tahap Pelaksanaan: [...]
+               - Tahap Asesmen: [...]
+            6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna). Gunakan istilah **LKM (Lembar Kegiatan Murid)** (BUKAN LKPD) di seluruh uraian.
             7. Asesmen Pembelajaran mencakup Asesmen Awal, Asesmen Proses (Formatif), dan Asesmen Akhir (Sumatif) beserta Rubrik Penilaian dan Pedoman Penskorannya.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
@@ -639,13 +675,13 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
               "tujuan_pembelajaran": "Uraian tujuan pembelajaran yang spesifik, operasional, dan terukur sesuai materi.",
               "pemahaman_bermakna": "Uraian pemahaman bermakna yang mendalam terkait materi.",
               "pertanyaan_pemantik": "2 pertanyaan pemantik yang kontekstual dan menantang daya nalar kritis siswa.",
-              "praktik_pedagogis": "Uraian model pembelajaran (Pilih satu: Problem Based Learning / Discovery Learning / Inquiri / Project Based Learning) dan metode pembelajarannya.",
-              "kemitraan_pembelajaran": "Uraian kemitraan lingkungan sekolah dan lingkungan luar sekolah secara kontekstual.",
-              "lingkungan_belajar": "Uraian ruang fisik, ruang virtual, dan budaya belajar yang ingin dikembangkan.",
-              "pemanfaatan_digital": "Uraian pemanfaatan digital pada tahap perencanaan, pelaksanaan, dan asesmen.",
+              "praktik_pedagogis": "Model Pembelajaran: [Isi model]\\nMetode Pembelajaran Pendukung: [Isi metode dengan penomoran]",
+              "kemitraan_pembelajaran": "Kemitraan Lingkungan Sekolah: [Isi]\\nKemitraan Lingkungan Luar Sekolah: [Isi]",
+              "lingkungan_belajar": "Ruang Fisik: [Isi]\\nRuang Virtual: [Isi]\\nBudaya Belajar: [Isi]",
+              "pemanfaatan_digital": "Tahap Perencanaan: [Isi]\\nTahap Pelaksanaan: [Isi]\\nTahap Asesmen: [Isi]",
               "kegiatan_pendahuluan": "Langkah rinci kegiatan pendahuluan (orientasi, apersepsi, asesmen awal).",
               "kegiatan_memahami": "Langkah rinci kegiatan inti pada tahap Memahami.",
-              "kegiatan_mengaplikasi": "Langkah rinci kegiatan inti pada tahap Mengaplikasi.",
+              "kegiatan_mengaplikasi": "Langkah rinci kegiatan inti pada tahap Mengaplikasi menggunakan LKM.",
               "kegiatan_merefleksi": "Langkah rinci kegiatan inti pada tahap Merefleksi dan presentasi.",
               "kegiatan_penutup": "Langkah rinci kegiatan penutup yang joyful dan bermakna.",
               "asesmen_awal": "Uraian asesmen awal untuk cek kesiapan belajar.",
@@ -693,9 +729,9 @@ if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
           "Dokumen Word (.docx) siap diunduh dengan struktur matriks rapi:"
-          " Kolom kiri Bold penuh, kolom kanan reguler, Dimensi Profil Lulusan"
-          " hanya menampilkan yang dipilih saja, serta Rubrik Penilaian dan"
-          " Pedoman Penskoran tersusun rapi di bawah tabel."
+          " Kolom kiri Bold penuh, sub-bagian kolom kanan Bold tegas, istilah"
+          " LKPD diganti LKM, serta Rubrik Penilaian dan Pedoman Penskoran"
+          " tersusun rapi di bawah tabel."
       )
 
       docx_file = generate_docx(
