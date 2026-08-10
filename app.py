@@ -51,17 +51,14 @@ if not check_password():
   st.stop()
 # ===================================
 
-# Custom CSS untuk tampilan UI yang modern, keren, dan profesional
+# Custom CSS untuk tampilan UI yang modern dan profesional
 st.markdown(
     """
     <style>
-    /* Styling Global & Background */
     .stApp {
         background-color: #0e1117;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
-    /* Header Card Banner Modern */
     .header-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         padding: 16px 20px;
@@ -77,14 +74,11 @@ st.markdown(
         margin: 0;
         letter-spacing: 0.3px;
     }
-    
-    /* Animasi Berkedip (Blinking) untuk Subtitle agar kontras & menarik */
     @keyframes blink-animation {
-        0% { opacity: 1; color: #facc15; } /* Kuning Cerah */
-        50% { opacity: 0.35; color: #38bdf8; } /* Biru Cyan Cerah */
+        0% { opacity: 1; color: #facc15; }
+        50% { opacity: 0.35; color: #38bdf8; }
         100% { opacity: 1; color: #facc15; }
     }
-    
     .header-subtitle {
         font-size: 11.5px;
         margin-top: 6px;
@@ -95,8 +89,6 @@ st.markdown(
         animation: blink-animation 1.6s infinite ease-in-out;
         font-weight: 600;
     }
-    
-    /* Tombol Utama (Generate Button) */
     .stButton > button {
         width: 100%;
         border-radius: 8px;
@@ -113,26 +105,6 @@ st.markdown(
         box-shadow: 0 6px 18px rgba(59, 130, 246, 0.5);
         transform: translateY(-2px);
     }
-    
-    /* Tombol Unduh (Download Button) */
-    .stDownloadButton > button {
-        width: 100%;
-        border-radius: 8px;
-        font-weight: 600;
-        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-        color: white;
-        border: none;
-        padding: 0.65rem 1rem;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-        transition: all 0.3s ease;
-    }
-    .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #047857 0%, #059669 100%);
-        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
-        transform: translateY(-2px);
-    }
-    
-    /* Styling Sidebar */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #1f2937;
@@ -170,6 +142,7 @@ with st.sidebar:
 
   if jenjang_pendidikan == "SD / MI":
     default_mapel = "Tematik / Kelas"
+    jp_guidance = "Panduan: 1 JP = 35 Menit"
     fase_options = [
         "Fase A / Kelas 1 SD",
         "Fase A / Kelas 2 SD",
@@ -180,6 +153,7 @@ with st.sidebar:
     ]
   elif jenjang_pendidikan == "SMP / MTs":
     default_mapel = "Matematika / IPA / IPS"
+    jp_guidance = "Panduan: 1 JP = 40 Menit"
     fase_options = [
         "Fase D / Kelas 7 SMP",
         "Fase D / Kelas 8 SMP",
@@ -187,6 +161,7 @@ with st.sidebar:
     ]
   elif jenjang_pendidikan == "SMA / MA":
     default_mapel = "Bahasa Indonesia / Matematika"
+    jp_guidance = "Panduan: 1 JP = 45 Menit"
     fase_options = [
         "Fase E / Kelas X SMA",
         "Fase F / Kelas XI SMA",
@@ -196,6 +171,7 @@ with st.sidebar:
     default_mapel = (
         "Dasar-dasar Teknik Otomotif / Produk Kreatif dan Kewirausahaan"
     )
+    jp_guidance = "Panduan: 1 JP = 45 Menit"
     fase_options = [
         "Fase E / Kelas X SMK (Program Dasar Keahlian)",
         "Fase F / Kelas XI SMK (Konsentrasi Keahlian)",
@@ -215,13 +191,18 @@ with st.sidebar:
           else "Contoh: Menyimak Teks Laporan Observasi Secara Kritis"
       ),
   )
-  alokasi_waktu = st.text_input("Alokasi Waktu", "2 Pertemuan (4 x 45 Menit)")
+
+  st.caption(jp_guidance)
+  alokasi_waktu = st.text_input(
+      "Alokasi Waktu", "2 JP (2 x 45 Menit)"
+  )
+  pertemuan_ke = st.text_input("Pertemuan Ke-", "1 (Pertemuan Pertama)")
 
   st.markdown("---")
   st.header("🏫 Identitas Satuan Pendidikan")
-  nama_sekolah = st.text_input("Nama Sekolah", "SD Negeri Balongsari 2 Surabaya")
+  nama_sekolah = st.text_input("Nama Sekolah", "SMK Miftahut Tholibin Kwanyar")
   semester = st.selectbox("Semester", ["Ganjil", "Genap"])
-  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2026/2027")
+  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2025/2026")
 
   st.markdown("---")
   st.header("✍️ Identitas Pengesahan Dokumen")
@@ -241,7 +222,7 @@ def set_cell_background(cell, fill_color):
   cell._tc.get_or_add_tcPr().append(shading_elm)
 
 
-# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks dengan Estetika Eye-Catching & Format Rata Kiri
+# Fungsi pembentuk dokumen Word lengkap berbasis Tabel Matriks sesuai sistematika baru
 def generate_docx(
     data_ai,
     nama_sekolah,
@@ -251,6 +232,7 @@ def generate_docx(
     fase_kelas,
     topik,
     alokasi_waktu,
+    pertemuan_ke,
     nama_penulis,
     nama_kota,
     tanggal_pembuatan,
@@ -281,7 +263,6 @@ def generate_docx(
   run_title.font.size = Pt(13)
   run_title.font.bold = True
 
-  # Helper untuk menambah tabel section dengan header kuning, kolom kiri berwarna (eye-catching), dan format teks sesuai permintaan
   def add_section_table(title_text, rows_data):
     table = doc.add_table(rows=len(rows_data) + 1, cols=2)
     table.style = "Table Grid"
@@ -306,13 +287,11 @@ def generate_docx(
       row_cells = table.rows[idx + 1].cells
       row_cells[0].text = label
       row_cells[1].text = str(val)
-      row_cells[0].width = Inches(2.2)
-      row_cells[1].width = Inches(4.3)
+      row_cells[0].width = Inches(2.3)
+      row_cells[1].width = Inches(4.2)
 
-      # Memberikan warna latar belakang lembut pada kolom kiri agar Eye-Catching
       set_cell_background(row_cells[0], "F2F5F9")
 
-      # Kolom Kiri (Label) -> Bold & Rata Kiri
       for p in row_cells[0].paragraphs:
         p.paragraph_format.space_before = Pt(4)
         p.paragraph_format.space_after = Pt(4)
@@ -323,7 +302,6 @@ def generate_docx(
           run.font.bold = True
           run.font.color.rgb = RGBColor(51, 51, 51)
 
-      # Kolom Kanan (Isi)
       for p in row_cells[1].paragraphs:
         p.paragraph_format.space_before = Pt(4)
         p.paragraph_format.space_after = Pt(4)
@@ -331,28 +309,27 @@ def generate_docx(
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
         text_p = p.text.strip()
-
-        # KHUSUS TABEL IDENTITAS: Kolom kanan TIDAK BOLEH BOLD (Normal)
-        if title_text == "IDENTITAS":
+        if title_text == "IDENTIFIKASI DAN INFORMASI UMUM":
           for run in p.runs:
             run.font.size = Pt(10)
             run.font.bold = False
             run.font.color.rgb = RGBColor(51, 51, 51)
         else:
-          # TABEL KONTEN LAINNYA: Sub-bagian/subjudul dicetak Bold, isi teks normal
           is_subheader = (
-              text_p.startswith("PERTEMUAN")
+              text_p.startswith("Model")
+              or text_p.startswith("Metode")
+              or text_p.startswith("Lingkungan")
+              or text_p.startswith("Ruang")
+              or text_p.startswith("Tahap")
               or text_p.startswith("Kegiatan")
+              or text_p.startswith("Memahami")
+              or text_p.startswith("Mengaplikasi")
+              or text_p.startswith("Merefleksi")
               or text_p.startswith("Asesmen")
               or text_p.startswith("1.")
               or text_p.startswith("2.")
               or text_p.startswith("3.")
               or text_p.startswith("4.")
-              or text_p.startswith("a.")
-              or text_p.startswith("b.")
-              or text_p.startswith("c.")
-              or text_p.startswith("d.")
-              or text_p.startswith("☐")
               or text_p.endswith(":")
               or (len(text_p) < 85 and not text_p.endswith("."))
           )
@@ -366,92 +343,207 @@ def generate_docx(
 
     doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-  # 1. Tabel Identitas
-  tabel_identitas = [
-      ("Penyusun", nama_penulis),
-      ("Sekolah", nama_sekolah),
-      ("Tahun Pelajaran", tahun_pelajaran),
-      ("Semester", semester),
-      ("Mata Pelajaran", mata_pelajaran),
-      ("Kelas / Fase Capaian", fase_kelas),
-      ("Topik / Elemen", topik),
-      ("Alokasi Waktu", alokasi_waktu),
-  ]
-  add_section_table("IDENTITAS", tabel_identitas)
-
-  # 2. Tabel A. Identifikasi
+  # 1. Identifikasi dan Informasi Umum
   tabel_identifikasi = [
+      ("Penulis Modul", nama_penulis),
+      ("Satuan Pendidikan", nama_sekolah),
+      ("Mata Pelajaran", mata_pelajaran),
+      ("Fase / Kelas", fase_kelas),
       (
-          "Peserta Didik",
-          data_ai.get(
-              "peserta_didik",
-              "Analisis kesiapan awal dan karakteristik peserta didik.",
-          ),
+          "Semester / Tahun Pelajaran",
+          f"{semester} / {tahun_pelajaran}",
       ),
-      (
-          "Materi Pelajaran",
-          data_ai.get("materi_esensial", "Analisis materi esensial."),
-      ),
+      ("Materi / Topik", topik),
+      ("Alokasi Waktu", alokasi_waktu),
+      ("Pertemuan Ke-", pertemuan_ke),
+  ]
+  add_section_table("IDENTIFIKASI DAN INFORMASI UMUM", tabel_identifikasi)
+
+  # 2. Dimensi Profil Lulusan
+  tabel_dpl = [
       (
           "Dimensi Profil Lulusan",
           data_ai.get(
               "dimensi_profil_lulusan",
-              "Dimensi Profil Lulusan yang dipilih:\n"
-              "☐ DPL3 Penalaran Kritis\n☐ DPL5 Kolaborasi",
+              "☐ Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa\n"
+              "☐ Kewargaan\n"
+              "☑ Penalaran Kritis\n"
+              "☐ Kreativitas\n"
+              "☑ Kolaborasi\n"
+              "☐ Kemandirian\n"
+              "☐ Kesehatan\n"
+              "☑ Komunikasi",
           ),
       ),
   ]
-  add_section_table("A. Identifikasi Kompetensi & Karakteristik", tabel_identifikasi)
+  add_section_table("DIMENSI PROFIL LULUSAN", tabel_dpl)
 
-  # 3. Tabel B. Desain Pembelajaran
-  tabel_desain = [
+  # 3. Tujuan Pembelajaran
+  tabel_tujuan = [
       (
-          "Desain Pembelajaran Mendalam",
+          "Tujuan Pembelajaran",
           data_ai.get(
-              "desain_pembelajaran",
-              "Praktik pedagogik, kemitraan, lingkungan, dan digital.",
+              "tujuan_pembelajaran",
+              "Peserta didik mampu menguasai kompetensi sesuai materi.",
           ),
       ),
   ]
-  add_section_table("B. Desain Pembelajaran (Deep Learning)", tabel_desain)
+  add_section_table("TUJUAN PEMBELAJARAN", tabel_tujuan)
 
-  # 4. Tabel C. Pengalaman Belajar
+  # 4. Pemahaman Bermakna & Pertanyaan Pemantik
+  tabel_pemahaman = [
+      (
+          "Pemahaman Bermakna",
+          data_ai.get(
+              "pemahaman_bermakna",
+              "Manfaat praktis dan esensi pembelajaran bagi kehidupan.",
+          ),
+      ),
+      (
+          "Pertanyaan Pemantik",
+          data_ai.get(
+              "pertanyaan_pemantik",
+              "Pertanyaan kritis untuk menstimulasi rasa ingin tahu peserta"
+              " didik.",
+          ),
+      ),
+  ]
+  add_section_table(
+      "PEMAHAMAN BERMAKNA & PERTANYAAN PEMANTIK", tabel_pemahaman
+  )
+
+  # 5. Kerangka Pembelajaran
+  tabel_kerangka = [
+      (
+          "Praktik Pedagogis",
+          data_ai.get(
+              "praktik_pedagogis",
+              "Model: Problem Based Learning\nMetode: Diskusi, Tanya Jawab,"
+              " Analisis Teks",
+          ),
+      ),
+      (
+          "Kemitraan Pembelajaran",
+          data_ai.get(
+              "kemitraan_pembelajaran",
+              "Lingkungan Sekolah: Kolaborasi guru mapel produktif.\nLingkungan"
+              " Luar Sekolah: Pemanfaatan data/narasumber instansi terkait.",
+          ),
+      ),
+      (
+          "Lingkungan Belajar",
+          data_ai.get(
+              "lingkungan_belajar",
+              "Ruang Fisik: Kelas fleksibel dan kolaboratif.\nRuang Virtual:"
+              " Google Drive / LMS Sekolah.\nRuang/Budaya Belajar: Kolaboratif,"
+              " Berpikir Kritis, Keterbukaan.",
+          ),
+      ),
+      (
+          "Pemanfaatan Digital",
+          data_ai.get(
+              "pemanfaatan_digital",
+              "Tahap Perencanaan: AI & Cloud Storage.\nTahap Pelaksanaan: QR"
+              " Code & Audio/Video Digital.\nTahap Asesmen: Google Form /"
+              " Menti.",
+          ),
+      ),
+  ]
+  add_section_table("KERANGKA PEMBELAJARAN", tabel_kerangka)
+
+  # 6. Pengalaman Belajar (Langkah-langkah)
   tabel_pengalaman = [
       (
-          "Pertemuan 1",
+          "Kegiatan Pendahuluan",
           data_ai.get(
-              "pengalaman_belajar_1",
-              "Kegiatan Awal, Inti, dan Penutup Pertemuan 1.",
+              "kegiatan_pendahuluan",
+              "Orientasi, Apersepsi, Motivasi, dan Asesmen Diagnostik awal.",
           ),
       ),
       (
-          "Pertemuan 2",
+          "Kegiatan Inti (Memahami)",
           data_ai.get(
-              "pengalaman_belajar_2",
-              "Kegiatan Awal, Inti, dan Penutup Pertemuan 2.",
+              "kegiatan_memahami",
+              "Eksplorasi konsep dan penyajian masalah autentik.",
+          ),
+      ),
+      (
+          "Kegiatan Inti (Mengaplikasi)",
+          data_ai.get(
+              "kegiatan_mengaplikasi",
+              "Penyelidikan kolaboratif dan penerapan konsep dalam LKPD.",
+          ),
+      ),
+      (
+          "Kegiatan Inti (Merefleksi)",
+          data_ai.get(
+              "kegiatan_merefleksi",
+              "Presentasi kelompok, umpan balik konstruktif, dan penguatan.",
+          ),
+      ),
+      (
+          "Kegiatan Penutup",
+          data_ai.get(
+              "kegiatan_penutup",
+              "Refleksi bersama yang menyenangkan (joyful) dan bermakna.",
           ),
       ),
   ]
-  add_section_table("C. Pengalaman Belajar (Berkesan & Bermakna)", tabel_pengalaman)
+  add_section_table("PENGALAMAN BELAJAR (LANGKAH-LANGKAH)", tabel_pengalaman)
 
-  # 5. Tabel D. Asesmen & Rubrik
+  # 7. Asesmen Pembelajaran
   tabel_asesmen = [
       (
-          "Asesmen Pembelajaran & Rubrik",
+          "Asesmen Awal",
           data_ai.get(
-              "asesmen_rubrik",
-              "Asesmen diagnostik, formatif, sumatif, dan rubrik unjuk kerja.",
+              "asesmen_awal", "Cek kesiapan sebelum masuk topik pembelajaran."
+          ),
+      ),
+      (
+          "Asesmen Proses (Formatif)",
+          data_ai.get(
+              "asesmen_formatif",
+              "Pemantauan partisipasi, keaktifan, dan pemahaman selama"
+              " kegiatan.",
+          ),
+      ),
+      (
+          "Asesmen Akhir (Sumatif)",
+          data_ai.get(
+              "asesmen_sumatif",
+              "Evaluasi hasil berbasis unjuk kerja atau refleksi kedalaman"
+              " konsep.",
           ),
       ),
   ]
-  add_section_table("D. Asesmen Pembelajaran Vokasi / Akademik", tabel_asesmen)
+  add_section_table("ASESMEN PEMBELAJARAN", tabel_asesmen)
+
+  # 8. Rubrik Penilaian & Pedoman Penskoran
+  tabel_rubrik = [
+      (
+          "Rubrik Penilaian",
+          data_ai.get(
+              "rubrik_penilaian",
+              "Matriks penilaian unjuk kerja (Perlu Bimbingan, Cukup, Baik,"
+              " Sangat Baik).",
+          ),
+      ),
+      (
+          "Pedoman Penskoran",
+          data_ai.get(
+              "pedoman_penskoran",
+              "Rumus Nilai Akhir = (Skor Perolehan / Skor Maksimal) * 100",
+          ),
+      ),
+  ]
+  add_section_table("RUBRIK PENILAIAN & PEDOMAN PENSKORAN", tabel_rubrik)
 
   # Tanda Tangan / Pengesahan di Bagian Bawah
   p_sign = doc.add_paragraph()
   p_sign.alignment = WD_ALIGN_PARAGRAPH.RIGHT
   p_sign.paragraph_format.space_before = Pt(14)
   p_sign.paragraph_format.space_after = Pt(4)
-  p_sign.add_run(f"{nama_kota}, {tanggal_pembuatan}\nDisusun,\n\n\n")
+  p_sign.add_run(f"{nama_kota}, {tanggal_pembuatan}\nPenyusun,\n\n\n")
   run_name = p_sign.add_run(f"{nama_penulis}")
   run_name.font.bold = True
   p_sign.add_run(f"\nNIP. {nip_penulis}")
@@ -462,39 +554,53 @@ def generate_docx(
   return bio
 
 
-if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
+if st.button("🚀 Buat Modul Ajar Sesuai Sistematika Baru"):
   if not api_key:
     st.error("Mohon masukkan Google Gemini API Key terlebih dahulu.")
   elif not topik:
     st.warning("Mohon isi topik pembelajaran.")
   else:
-    with st.spinner(
-        "Gemini sedang menyusun Modul Ajar Komprehensif Format Tabel..."
-    ):
+    with st.spinner("Gemini sedang menyusun Modul Ajar Komprehensif..."):
       genai.configure(api_key=api_key)
-      model = genai.GenerativeModel("gemini-3.5-flash")
+      model = genai.GenerativeModel("gemini-1.5-flash")
 
       prompt = f"""
-            Bertindaklah sebagai pakar kurikulum dan praktisi pendidikan profesional. Buatkan konten Modul Ajar Berbasis Pembelajaran Mendalam (Deep Learning) yang **SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF** untuk:
+            Bertindaklah sebagai pakar kurikulum profesional. Buatkan konten Modul Ajar Berbasis Pembelajaran Mendalam (Deep Learning) yang **SANGAT LENGKAP, DETAIL, DAN KOMPREHENSIF** untuk:
             - Jenjang: {jenjang_pendidikan} ({fase_kelas})
             - Mata Pelajaran: {mata_pelajaran}
             - Topik / Materi Pokok: {topik}
             - Alokasi Waktu: {alokasi_waktu}
+            - Pertemuan Ke-: {pertemuan_ke}
 
-            Catatan Penting:
-            - Gunakan istilah "Dimensi Profil Lulusan (DPL)" secara konsisten (jangan gunakan istilah lama Profil Pelajar Pancasila).
-            - Pilih 2 sampai 4 Dimensi Profil Lulusan (DPL) yang paling relevan dan kontekstual dengan topik "{topik}" dari daftar 8 DPL berikut (DPL1: Keimanan & Ketakwaan, DPL2: Kewargaan, DPL3: Penalaran Kritis, DPL4: Kreativitas, DPL5: Kolaborasi, DPL6: Kemandirian, DPL7: Kesehatan, DPL8: Komunikasi). Berikan format kotak centang (☐) hanya pada DPL yang dipilih tersebut.
-            - Pastikan setiap sub-bagian, subjudul, atau poin penomoran (seperti "Analisis Karakteristik...", "1. Kompetensi Awal & Prasyarat:", dll.) diletakkan pada baris baru dan diakhiri dengan tanda titik dua (:) agar aplikasi dapat memformatnya menjadi tebal (bold) dengan rapi.
+            Ketentuan Penting:
+            1. Dimensi Profil Lulusan (Pilih 2 atau 4 yang paling relevan dari 8 dimensi berikut dan beri tanda centang ☑ pada yang dipilih dan ☐ pada yang tidak dipilih: Keimanan dan Ketaqwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi).
+            2. Praktik Pedagogis (Gunakan salah satu model: Problem Based Learning / Discovery Learning / Inquiri / Project Based Learning, serta metode pembelajaran pendukung minimal 2-3 metode).
+            3. Kemitraan Pembelajaran (Lingkungan Sekolah & Lingkungan Luar Sekolah).
+            4. Lingkungan Belajar (Ruang Fisik, Ruang Virtual, Ruang/Budaya Belajar).
+            5. Pemanfaatan Digital (Tahap Perencanaan, Tahap Pelaksanaan, Tahap Asesmen).
+            6. Pengalaman Belajar harus terstruktur mencakup Kegiatan Pendahuluan, Kegiatan Inti (Memahami, Mengaplikasi, Merefleksi), dan Kegiatan Penutup (refleksi joyful dan bermakna).
+            7. Asesmen Pembelajaran mencakup Asesmen Awal, Asesmen Proses (Formatif), dan Asesmen Akhir (Sumatif) beserta Rubrik Penilaian dan Pedoman Penskorannya.
 
             Berikan output HANYA dalam format JSON valid yang memuat kunci-kunci berikut:
             {{
-              "peserta_didik": "Uraian sangat detail mengenai kompetensi awal, prasyarat, gaya belajar, dan kesiapan peserta didik. Buat subjudul terstruktur dengan diakhiri tanda titik dua (:).",
-              "materi_esensial": "Uraian sangat detail mengenai materi esensial, konsep utama, dan relevansi dunia nyata/industri.",
-              "dimensi_profil_lulusan": "Sebutkan pilihan DPL yang relevan saja (misal 2 atau 3 DPL) yang paling sesuai dengan topik ini, lengkap dengan kotak centang ☐ pada masing-masing pilihan terpilih serta deskripsi singkat penerapannya.",
-              "desain_pembelajaran": "Uraian rinci desain pembelajaran mendalam mencakup praktik pedagogik, kemitraan, lingkungan belajar, dan integrasi digital.",
-              "pengalaman_belajar_1": "Uraian rinci Pertemuan 1 yang mencakup Kegiatan Awal, Kegiatan Inti, dan Kegiatan Penutup/Refleksi.",
-              "pengalaman_belajar_2": "Uraian rinci Pertemuan 2 yang mencakup Kegiatan Awal, Kegiatan Inti, dan Kegiatan Penutup/Refleksi.",
-              "asesmen_rubrik": "Uraian rinci asesmen diagnostik, formatif, sumatif, beserta matriks rubrik penilaian unjuk kerja yang operasional dan lengkap."
+              "dimensi_profil_lulusan": "Daftar 8 DPL dengan tanda centang ☑ pada yang dipilih dan ☐ pada yang lain beserta uraian singkat penerapannya.",
+              "tujuan_pembelajaran": "Uraian tujuan pembelajaran yang spesifik, operasional, dan terukur sesuai materi.",
+              "pemahaman_bermakna": "Uraian pemahaman bermakna yang mendalam terkait materi.",
+              "pertanyaan_pemantik": "2 pertanyaan pemantik yang kontekstual dan menantang daya nalar kritis siswa.",
+              "praktik_pedagogis": "Uraian model pembelajaran (Pilih satu: Problem Based Learning / Discovery Learning / Inquiri / Project Based Learning) dan metode pembelajarannya.",
+              "kemitraan_pembelajaran": "Uraian kemitraan lingkungan sekolah dan lingkungan luar sekolah secara kontekstual.",
+              "lingkungan_belajar": "Uraian ruang fisik, ruang virtual, dan budaya belajar yang ingin dikembangkan.",
+              "pemanfaatan_digital": "Uraian pemanfaatan digital pada tahap perencanaan, pelaksanaan, dan asesmen.",
+              "kegiatan_pendahuluan": "Langkah rinci kegiatan pendahuluan (orientasi, apersepsi, asesmen awal).",
+              "kegiatan_memahami": "Langkah rinci kegiatan inti pada tahap Memahami.",
+              "kegiatan_mengaplikasi": "Langkah rinci kegiatan inti pada tahap Mengaplikasi.",
+              "kegiatan_merefleksi": "Langkah rinci kegiatan inti pada tahap Merefleksi dan presentasi.",
+              "kegiatan_penutup": "Langkah rinci kegiatan penutup yang joyful dan bermakna.",
+              "asesmen_awal": "Uraian asesmen awal untuk cek kesiapan belajar.",
+              "asesmen_formatif": "Uraian asesmen proses/formatif pemantauan partisipasi.",
+              "asesmen_sumatif": "Uraian asesmen akhir/sumatif evaluasi unjuk kerja.",
+              "rubrik_penilaian": "Matriks rubrik penilaian lengkap dari Perlu Bimbingan hingga Sangat Baik.",
+              "pedoman_penskoran": "Rumus perhitungan nilai akhir dan interval predikat."
             }}
             """
 
@@ -512,38 +618,12 @@ if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
       try:
         data_ai = json.loads(text_resp)
       except Exception:
-        data_ai = {
-            "peserta_didik": (
-                "Peserta didik telah memahami konsep prasyarat dan siap"
-                " mengikuti pembelajaran."
-            ),
-            "materi_esensial": (
-                f"Materi esensial terkait {topik} dan relevansinya."
-            ),
-            "dimensi_profil_lulusan": (
-                "Dimensi Profil Lulusan yang relevan:\n☐ DPL3 Penalaran"
-                " Kritis\n☐ DPL5 Kolaborasi"
-            ),
-            "desain_pembelajaran": (
-                "Pendekatan pembelajaran mendalam (Deep Learning) terintegrasi."
-            ),
-            "pengalaman_belajar_1": (
-                "Kegiatan awal, inti, dan penutup Pertemuan 1."
-            ),
-            "pengalaman_belajar_2": (
-                "Kegiatan awal, inti, dan penutup Pertemuan 2."
-            ),
-            "asesmen_rubrik": (
-                "Asesmen diagnostik, formatif, sumatif, dan rubrik penilaian."
-            ),
-        }
+        data_ai = {}
 
-      st.success(
-          "Modul Ajar Komprehensif Berbasis Format Tabel Berhasil Disusun!"
-      )
+      st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
-          "Dokumen Word (.docx) siap diunduh dengan kolom kiri berwarna,"
-          " identitas kanan normal, serta sub-bagian tercetak tebal."
+          "Dokumen Word (.docx) siap diunduh dengan struktur matriks lengkap,"
+          " kolom kiri berwarna, dan format rapi."
       )
 
       docx_file = generate_docx(
@@ -555,6 +635,7 @@ if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
           fase_kelas,
           topik,
           alokasi_waktu,
+          pertemuan_ke,
           nama_penulis,
           nama_kota,
           tanggal_pembuatan,
@@ -562,11 +643,9 @@ if st.button("🚀 Buat Modul Ajar Lengkap Format Tabel"):
       )
 
       st.download_button(
-          label=(
-              "📥 Unduh Modul Ajar Lengkap (Format Tabel Matriks .docx)"
-          ),
+          label="📥 Unduh Modul Ajar Format Tabel Matriks (.docx)",
           data=docx_file,
-          file_name=f"Modul_Ajar_Lengkap_{topik.replace(' ', '_')}.docx",
+          file_name=f"Modul_Ajar_{topik.replace(' ', '_')}.docx",
           mime=(
               "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           ),
