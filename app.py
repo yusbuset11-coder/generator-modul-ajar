@@ -200,7 +200,7 @@ with st.sidebar:
   st.header("🏫 Identitas Satuan Pendidikan")
   nama_sekolah = st.text_input("Nama Sekolah", "SMK Miftahut Tholibin Kwanyar")
   semester = st.selectbox("Semester", ["Ganjil", "Genap"])
-  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2025/2026")
+  tahun_pelajaran = st.text_input("Tahun Pelajaran", "2026/2027")
 
   st.markdown("---")
   st.header("✍️ Identitas Pengesahan Dokumen")
@@ -251,26 +251,27 @@ def generate_docx(
   font.size = Pt(10)
   font.color.rgb = RGBColor(51, 51, 51)
 
-  # Judul Utama Dokumen
+  # Judul Utama Dokumen (Diperbesar, Warna Coklat Tua)
   p_title = doc.add_paragraph()
   p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
   p_title.paragraph_format.space_before = Pt(0)
   p_title.paragraph_format.space_after = Pt(12)
   run_title = p_title.add_run("MODUL AJAR PEMBELAJARAN MENDALAM")
   run_title.font.name = "Arial"
-  run_title.font.size = Pt(13)
+  run_title.font.size = Pt(15)
   run_title.font.bold = True
+  run_title.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
 
   def add_section_table(title_text, rows_data):
     table = doc.add_table(rows=len(rows_data) + 1, cols=2)
     table.style = "Table Grid"
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
 
-    # Header Row
+    # Header Row (Coklat Tua dengan Teks Putih)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].merge(hdr_cells[1])
     hdr_cells[0].text = title_text
-    set_cell_background(hdr_cells[0], "FFE599")
+    set_cell_background(hdr_cells[0], "5A3825")  # Coklat Tua
     for p in hdr_cells[0].paragraphs:
       p.alignment = WD_ALIGN_PARAGRAPH.LEFT
       p.paragraph_format.space_before = Pt(4)
@@ -278,7 +279,7 @@ def generate_docx(
       for run in p.runs:
         run.font.bold = True
         run.font.size = Pt(10)
-        run.font.color.rgb = RGBColor(51, 51, 51)
+        run.font.color.rgb = RGBColor(255, 255, 255)  # Teks Putih
 
     # Content Rows
     for idx, (label, val) in enumerate(rows_data):
@@ -287,7 +288,8 @@ def generate_docx(
       row_cells[0].width = Inches(2.3)
       row_cells[1].width = Inches(4.2)
 
-      set_cell_background(row_cells[0], "F2F5F9")
+      # Kolom Sebelah Kiri --> Coklat Muda / Krem Transparan
+      set_cell_background(row_cells[0], "F5EBE0")
 
       # 1. Kolom Sebelah Kiri --> Bold Semua
       for p in row_cells[0].paragraphs:
@@ -519,7 +521,7 @@ def generate_docx(
   hdr_cells = table_rubrik_hdr.rows[0].cells
   hdr_cells[0].merge(hdr_cells[1])
   hdr_cells[0].text = "RUBRIK PENILAIAN & PEDOMAN PENSKORAN"
-  set_cell_background(hdr_cells[0], "FFE599")
+  set_cell_background(hdr_cells[0], "5A3825")  # Coklat Tua
   for p in hdr_cells[0].paragraphs:
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p.paragraph_format.space_before = Pt(4)
@@ -527,7 +529,7 @@ def generate_docx(
     for run in p.runs:
       run.font.bold = True
       run.font.size = Pt(10)
-      run.font.color.rgb = RGBColor(51, 51, 51)
+      run.font.color.rgb = RGBColor(255, 255, 255)  # Teks Putih
 
   rubrik_data = data_ai.get("rubrik_penilaian", "")
   p_sub = doc.add_paragraph()
@@ -646,8 +648,9 @@ def generate_docx(
   p_inst_title.paragraph_format.space_after = Pt(12)
   r_inst_t = p_inst_title.add_run("INSTRUMEN ASESMEN PROSES (FORMATIF)")
   r_inst_t.font.name = "Arial"
-  r_inst_t.font.size = Pt(13)
+  r_inst_t.font.size = Pt(15)  # Diperbesar
   r_inst_t.font.bold = True
+  r_inst_t.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
 
   # Identitas Instrumen Asesmen dalam Tabel
   table_id_inst = doc.add_table(rows=3, cols=2)
@@ -664,7 +667,7 @@ def generate_docx(
   for row in table_id_inst.rows:
     row.cells[0].width = Inches(2.3)
     row.cells[1].width = Inches(4.2)
-    set_cell_background(row.cells[0], "F2F5F9")
+    set_cell_background(row.cells[0], "F5EBE0")  # Coklat Muda / Krem
     for cell in row.cells:
       for p in cell.paragraphs:
         p.paragraph_format.space_before = Pt(4)
@@ -713,8 +716,9 @@ def generate_docx(
   p_lkm_title.paragraph_format.space_after = Pt(12)
   r_lkm_t = p_lkm_title.add_run("LEMBAR KERJA MURID (LKM)")
   r_lkm_t.font.name = "Arial"
-  r_lkm_t.font.size = Pt(13)
+  r_lkm_t.font.size = Pt(15)  # Diperbesar
   r_lkm_t.font.bold = True
+  r_lkm_t.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
 
   # Identitas Lembar Kerja Siswa dalam Tabel
   table_id_lkm = doc.add_table(rows=3, cols=2)
@@ -733,7 +737,7 @@ def generate_docx(
   for row in table_id_lkm.rows:
     row.cells[0].width = Inches(2.3)
     row.cells[1].width = Inches(4.2)
-    set_cell_background(row.cells[0], "F2F5F9")
+    set_cell_background(row.cells[0], "F5EBE0")  # Coklat Muda / Krem
     for cell in row.cells:
       for p in cell.paragraphs:
         p.paragraph_format.space_before = Pt(4)
