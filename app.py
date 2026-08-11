@@ -867,7 +867,7 @@ if st.button("🚀 Buat Modul Ajar Pembelajaran Mendalam"):
   elif not topik:
     st.warning("Mohon isi topik pembelajaran.")
   else:
-    with st.spinner("Gemini sedang menyusun Modul Ajar Komprehensif..."):
+    with st.spinner("Yusbuset sedang menyusun Modul Ajar Pembelajaran Mendalam ..."):
       genai.configure(api_key=api_key)
       model = genai.GenerativeModel("gemini-3.5-flash")
 
