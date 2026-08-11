@@ -626,7 +626,7 @@ def generate_docx(
     r_desc.font.bold = False
     r_desc.font.size = Pt(10)
 
-  penskoran_data = data_ai.get("pedoman_penskoran", "")
+  # Bagian B: Pedoman Penskoran & Perhitungan Nilai (Dibuat Berbentuk Tabel Rapi)
   p_score_title = doc.add_paragraph()
   p_score_title.paragraph_format.space_before = Pt(8)
   p_score_title.paragraph_format.space_after = Pt(4)
@@ -635,34 +635,84 @@ def generate_docx(
   r_stitle.font.size = Pt(10)
   r_stitle.font.color.rgb = RGBColor(51, 51, 51)
 
-  if isinstance(penskoran_data, dict):
-    for sk, sv in penskoran_data.items():
-      p_sval = doc.add_paragraph()
-      p_sval.paragraph_format.space_before = Pt(2)
-      p_sval.paragraph_format.space_after = Pt(2)
-      p_sval.paragraph_format.left_indent = Inches(0.2)
-      p_sval.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-      r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
-      r_sk.font.bold = True
-      r_sk.font.size = Pt(9.5)
-      r_sv = p_sval.add_run(
-          f"{str(sv).replace('LKPD', 'LKM').replace('Lembar Kegiatan Murid', 'Lembar Kerja Murid')}"
-      )
-      r_sv.font.bold = False
-      r_sv.font.size = Pt(9.5)
-  else:
-    p_sval = doc.add_paragraph()
-    p_sval.paragraph_format.space_before = Pt(2)
-    p_sval.paragraph_format.space_after = Pt(4)
-    p_sval.paragraph_format.left_indent = Inches(0.2)
-    p_sval.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    r_sv = p_sval.add_run(
-        str(penskoran_data)
-        .replace("LKPD", "LKM")
-        .replace("Lembar Kegiatan Murid", "Lembar Kerja Murid")
-    )
-    r_sv.font.bold = False
-    r_sv.font.size = Pt(10)
+  # Rumus Nilai
+  p_rumus = doc.add_paragraph()
+  p_rumus.paragraph_format.space_before = Pt(2)
+  p_rumus.paragraph_format.space_after = Pt(4)
+  p_rumus.paragraph_format.left_indent = Inches(0.2)
+  r_r1 = p_rumus.add_run("• Rumus Nilai: ")
+  r_r1.font.bold = True
+  r_r1.font.size = Pt(9.5)
+  r_r2 = p_rumus.add_run(
+      "Nilai Akhir = ((Skor Kriteria 1 + Skor Kriteria 2) / 8) x 100"
+  )
+  r_r2.font.size = Pt(9.5)
+
+  # Kategori Predikat Title
+  p_kat_title = doc.add_paragraph()
+  p_kat_title.paragraph_format.space_before = Pt(2)
+  p_kat_title.paragraph_format.space_after = Pt(4)
+  p_kat_title.paragraph_format.left_indent = Inches(0.2)
+  r_k1 = p_kat_title.add_run("• Kategori Predikat:")
+  r_k1.font.bold = True
+  r_k1.font.size = Pt(9.5)
+
+  # Tabel Interval Skor & Kategori
+  table_score = doc.add_table(rows=5, cols=2)
+  table_score.style = "Table Grid"
+  table_score.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+  # Header Tabel Skor
+  hdr_score = table_score.rows[0].cells
+  hdr_score[0].text = "Skor"
+  hdr_score[1].text = "Kategori"
+  set_cell_background(hdr_score[0], "5A3825")
+  set_cell_background(hdr_score[1], "5A3825")
+  for cell in hdr_score:
+    for p in cell.paragraphs:
+      p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+      for r in p.runs:
+        r.font.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+        r.font.size = Pt(9.5)
+
+  score_rows_data = [
+      ("90 - 100", "Sangat Baik (A)"),
+      ("80 - 89", "Baik (B)"),
+      ("70 - 79", "Cukup (C)"),
+      ("< 70", "Perlu Bimbingan (D)"),
+  ]
+  for idx, (skor_val, kat_val) in enumerate(score_rows_data):
+    row_c = table_score.rows[idx + 1].cells
+    row_c[0].text = skor_val
+    row_c[1].text = kat_val
+    row_c[0].width = Inches(2.0)
+    row_c[1].width = Inches(4.5)
+    set_cell_background(row_c[0], "F5EBE0")
+    for c_idx, cell in enumerate(row_c):
+      for p in cell.paragraphs:
+        p.paragraph_format.space_before = Pt(3)
+        p.paragraph_format.space_after = Pt(3)
+        if c_idx == 0:
+          p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        else:
+          p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        for r in p.runs:
+          r.font.size = Pt(9.5)
+
+  # Catatan di Bawah Tabel
+  p_catatan = doc.add_paragraph()
+  p_catatan.paragraph_format.space_before = Pt(6)
+  p_catatan.paragraph_format.space_after = Pt(6)
+  p_catatan.paragraph_format.left_indent = Inches(0.2)
+  r_c1 = p_catatan.add_run("Catatan:\n")
+  r_c1.font.bold = True
+  r_c1.font.size = Pt(9.5)
+  r_c2 = p_catatan.add_run(
+      "Murid dinyatakan tuntas/mencapai tujuan pembelajaran jika memperoleh"
+      " nilai minimal 70 (Predikat Baik)."
+  )
+  r_c2.font.size = Pt(9.5)
 
   doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
@@ -922,7 +972,7 @@ if st.button("🚀 Buat Modul Ajar Pembelajaran Mendalam"):
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
           "Dokumen Word (.docx) siap diunduh lengkap dengan halaman terpisah"
-          " untuk Rubrik & Pedoman Penskoran, Instrumen Asesmen Proses (Formatif), dan Lembar Kerja Murid (LKM)."
+          " untuk Rubrik & Pedoman Penskoran (dilengkapi tabel kategori predikat), Instrumen Asesmen Proses (Formatif), dan Lembar Kerja Murid (LKM)."
       )
 
       docx_file = generate_docx(
