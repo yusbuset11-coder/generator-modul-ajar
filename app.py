@@ -318,7 +318,7 @@ def generate_docx(
         p_right.paragraph_format.space_before = Pt(4)
         p_right.paragraph_format.space_after = Pt(4)
         p_right.paragraph_format.line_spacing = 1.15
-        p_right.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY  # Diubah menjadi rata kanan-kiri (Justify)
+        p_right.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
         if ":" in line:
           parts = line.split(":", 1)
@@ -514,23 +514,58 @@ def generate_docx(
   ]
   add_section_table("ASESMEN PEMBELAJARAN", tabel_asesmen)
 
-  # 8. Rubrik Penilaian & Pedoman Penskoran (Di bawah tabel)
-  table_rubrik_hdr = doc.add_table(rows=1, cols=2)
-  table_rubrik_hdr.style = "Table Grid"
-  table_rubrik_hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
-  hdr_cells = table_rubrik_hdr.rows[0].cells
-  hdr_cells[0].merge(hdr_cells[1])
-  hdr_cells[0].text = "RUBRIK PENILAIAN & PEDOMAN PENSKORAN"
-  set_cell_background(hdr_cells[0], "5A3825")  # Coklat Tua
-  for p in hdr_cells[0].paragraphs:
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p.paragraph_format.space_before = Pt(4)
-    p.paragraph_format.space_after = Pt(4)
-    for run in p.runs:
-      run.font.bold = True
-      run.font.size = Pt(10)
-      run.font.color.rgb = RGBColor(255, 255, 255)  # Teks Putih
+  # Tanda Tangan / Pengesahan Modul Ajar
+  p_sign = doc.add_paragraph()
+  p_sign.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+  p_sign.paragraph_format.space_before = Pt(14)
+  p_sign.paragraph_format.space_after = Pt(4)
+  p_sign.add_run(f"{nama_kota}, {tanggal_pembuatan}\nPenyusun,\n\n\n")
+  run_name = p_sign.add_run(f"{nama_penulis}")
+  run_name.font.bold = True
+  p_sign.add_run(f"\nNIP. {nip_penulis}")
 
+  # ====================================================
+  # HALAMAN TERPISAH 1: RUBRIK PENILAIAN & PEDOMAN PENSKORAN
+  # ====================================================
+  doc.add_page_break()
+
+  p_rubrik_title = doc.add_paragraph()
+  p_rubrik_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+  p_rubrik_title.paragraph_format.space_before = Pt(0)
+  p_rubrik_title.paragraph_format.space_after = Pt(12)
+  r_rub_t = p_rubrik_title.add_run("RUBRIK PENILAIAN & PEDOMAN PENSKORAN")
+  r_rub_t.font.name = "Arial"
+  r_rub_t.font.size = Pt(15)
+  r_rub_t.font.bold = True
+  r_rub_t.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
+
+  # Identitas Rubrik dalam Tabel
+  table_id_rubrik = doc.add_table(rows=3, cols=2)
+  table_id_rubrik.style = "Table Grid"
+  table_id_rubrik.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+  table_id_rubrik.rows[0].cells[0].text = "Nama Guru / Pengamat:"
+  table_id_rubrik.rows[0].cells[1].text = f"{nama_penulis}"
+  table_id_rubrik.rows[1].cells[0].text = "Kelas / Fase:"
+  table_id_rubrik.rows[1].cells[1].text = f"{fase_kelas}"
+  table_id_rubrik.rows[2].cells[0].text = "Mata Pelajaran / Topik:"
+  table_id_rubrik.rows[2].cells[1].text = f"{mata_pelajaran} - {topik}"
+
+  for row in table_id_rubrik.rows:
+    row.cells[0].width = Inches(2.3)
+    row.cells[1].width = Inches(4.2)
+    set_cell_background(row.cells[0], "F5EBE0")
+    for cell in row.cells:
+      for p in cell.paragraphs:
+        p.paragraph_format.space_before = Pt(4)
+        p.paragraph_format.space_after = Pt(4)
+        for run in p.runs:
+          run.font.size = Pt(10)
+          run.font.bold = True
+
+  doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+  # Konten Rubrik Penilaian
   rubrik_data = data_ai.get("rubrik_penilaian", "")
   p_sub = doc.add_paragraph()
   p_sub.paragraph_format.space_before = Pt(6)
@@ -568,6 +603,7 @@ def generate_docx(
             p_lvl.paragraph_format.space_before = Pt(1)
             p_lvl.paragraph_format.space_after = Pt(2)
             p_lvl.paragraph_format.left_indent = Inches(0.4)
+            p_lvl.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             r_l_name = p_lvl.add_run(f"- {level_name}: ")
             r_l_name.font.bold = True
             r_l_name.font.size = Pt(9.5)
@@ -581,6 +617,7 @@ def generate_docx(
     p_rubrik.paragraph_format.space_before = Pt(4)
     p_rubrik.paragraph_format.space_after = Pt(4)
     p_rubrik.paragraph_format.left_indent = Inches(0.2)
+    p_rubrik.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     r_desc = p_rubrik.add_run(
         str(rubrik_data)
         .replace("LKPD", "LKM")
@@ -604,6 +641,7 @@ def generate_docx(
       p_sval.paragraph_format.space_before = Pt(2)
       p_sval.paragraph_format.space_after = Pt(2)
       p_sval.paragraph_format.left_indent = Inches(0.2)
+      p_sval.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
       r_sk = p_sval.add_run(f"• {sk.replace('_', ' ').title()}: ")
       r_sk.font.bold = True
       r_sk.font.size = Pt(9.5)
@@ -617,6 +655,7 @@ def generate_docx(
     p_sval.paragraph_format.space_before = Pt(2)
     p_sval.paragraph_format.space_after = Pt(4)
     p_sval.paragraph_format.left_indent = Inches(0.2)
+    p_sval.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     r_sv = p_sval.add_run(
         str(penskoran_data)
         .replace("LKPD", "LKM")
@@ -627,18 +666,8 @@ def generate_docx(
 
   doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-  # Tanda Tangan / Pengesahan Modul Ajar
-  p_sign = doc.add_paragraph()
-  p_sign.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-  p_sign.paragraph_format.space_before = Pt(14)
-  p_sign.paragraph_format.space_after = Pt(4)
-  p_sign.add_run(f"{nama_kota}, {tanggal_pembuatan}\nPenyusun,\n\n\n")
-  run_name = p_sign.add_run(f"{nama_penulis}")
-  run_name.font.bold = True
-  p_sign.add_run(f"\nNIP. {nip_penulis}")
-
   # ====================================================
-  # HALAMAN TERPISAH 1: INSTRUMEN ASESMEN PROSES (FORMATIF)
+  # HALAMAN TERPISAH 2: INSTRUMEN ASESMEN PROSES (FORMATIF)
   # ====================================================
   doc.add_page_break()
 
@@ -648,7 +677,7 @@ def generate_docx(
   p_inst_title.paragraph_format.space_after = Pt(12)
   r_inst_t = p_inst_title.add_run("INSTRUMEN ASESMEN PROSES (FORMATIF)")
   r_inst_t.font.name = "Arial"
-  r_inst_t.font.size = Pt(15)  # Diperbesar
+  r_inst_t.font.size = Pt(15)
   r_inst_t.font.bold = True
   r_inst_t.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
 
@@ -667,7 +696,7 @@ def generate_docx(
   for row in table_id_inst.rows:
     row.cells[0].width = Inches(2.3)
     row.cells[1].width = Inches(4.2)
-    set_cell_background(row.cells[0], "F5EBE0")  # Coklat Muda / Krem
+    set_cell_background(row.cells[0], "F5EBE0")
     for cell in row.cells:
       for p in cell.paragraphs:
         p.paragraph_format.space_before = Pt(4)
@@ -696,6 +725,7 @@ def generate_docx(
     p_inst_text = doc.add_paragraph()
     p_inst_text.paragraph_format.space_before = Pt(4)
     p_inst_text.paragraph_format.space_after = Pt(4)
+    p_inst_text.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     r_it = p_inst_text.add_run(
         str(instrumen_data)
         .replace("LKPD", "LKM")
@@ -706,7 +736,7 @@ def generate_docx(
   doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
   # ====================================================
-  # HALAMAN TERPISAH 2: LEMBAR KERJA MURID (LKM) DALAM BENTUK TABEL RAPI
+  # HALAMAN TERPISAH 3: LEMBAR KERJA MURID (LKM) DALAM BENTUK TABEL RAPI
   # ====================================================
   doc.add_page_break()
 
@@ -716,7 +746,7 @@ def generate_docx(
   p_lkm_title.paragraph_format.space_after = Pt(12)
   r_lkm_t = p_lkm_title.add_run("LEMBAR KERJA MURID (LKM)")
   r_lkm_t.font.name = "Arial"
-  r_lkm_t.font.size = Pt(15)  # Diperbesar
+  r_lkm_t.font.size = Pt(15)
   r_lkm_t.font.bold = True
   r_lkm_t.font.color.rgb = RGBColor(74, 46, 33)  # Coklat Tua
 
@@ -737,7 +767,7 @@ def generate_docx(
   for row in table_id_lkm.rows:
     row.cells[0].width = Inches(2.3)
     row.cells[1].width = Inches(4.2)
-    set_cell_background(row.cells[0], "F5EBE0")  # Coklat Muda / Krem
+    set_cell_background(row.cells[0], "F5EBE0")
     for cell in row.cells:
       for p in cell.paragraphs:
         p.paragraph_format.space_before = Pt(4)
@@ -767,6 +797,7 @@ def generate_docx(
     p_lkm_text = doc.add_paragraph()
     p_lkm_text.paragraph_format.space_before = Pt(4)
     p_lkm_text.paragraph_format.space_after = Pt(4)
+    p_lkm_text.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     r_lt = p_lkm_text.add_run(
         str(lkm_data)
         .replace("LKPD", "LKM")
@@ -891,7 +922,7 @@ if st.button("🚀 Buat Modul Ajar Pembelajaran Mendalam"):
       st.success("🎉 Modul Ajar Sesuai Sistematika Baru Berhasil Disusun!")
       st.info(
           "Dokumen Word (.docx) siap diunduh lengkap dengan halaman terpisah"
-          " untuk Instrumen Asesmen Proses (Formatif) dan Lembar Kerja Murid (LKM) dalam bentuk tabel matriks rapi."
+          " untuk Rubrik & Pedoman Penskoran, Instrumen Asesmen Proses (Formatif), dan Lembar Kerja Murid (LKM)."
       )
 
       docx_file = generate_docx(
