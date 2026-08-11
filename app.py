@@ -302,7 +302,7 @@ def generate_docx(
           run.font.bold = True
           run.font.color.rgb = RGBColor(51, 51, 51)
 
-      # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Menebalkan (Bold) Sub-Bagian / Label Tertentu
+      # 2. Kolom Sebelah Kanan --> Mengganti LKPD ke LKM serta Rata Kanan-Kiri (JUSTIFY)
       val_str = str(val).replace("LKPD", "LKM").replace(
           "Lembar Kegiatan Murid", "Lembar Kerja Murid"
       )
@@ -318,7 +318,7 @@ def generate_docx(
         p_right.paragraph_format.space_before = Pt(4)
         p_right.paragraph_format.space_after = Pt(4)
         p_right.paragraph_format.line_spacing = 1.15
-        p_right.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p_right.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY  # Diubah menjadi rata kanan-kiri (Justify)
 
         if ":" in line:
           parts = line.split(":", 1)
